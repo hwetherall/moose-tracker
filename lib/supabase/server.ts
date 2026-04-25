@@ -2,11 +2,12 @@ import { createClient } from "@supabase/supabase-js";
 import { env } from "@/lib/env";
 
 /**
- * Server-only, read-through anon client. Use for server components on the web surface.
- * Auth is handled at the app layer (NextAuth); RLS allows authenticated reads.
+ * Server-only read client. The web surface is gated by NextAuth middleware,
+ * while Supabase RLS only recognizes Supabase auth JWTs. Use the service role
+ * for server components so reads are not hidden behind the anon role.
  */
 export function supabaseServer() {
-  return createClient(env.supabaseUrl(), env.supabaseAnonKey(), {
+  return createClient(env.supabaseUrl(), env.supabaseServiceRoleKey(), {
     auth: { persistSession: false, autoRefreshToken: false }
   });
 }

@@ -55,12 +55,22 @@ export async function runSync(): Promise<{
 
     return { ok: true, planningRows: planning.length, experimentsRows: experiments.length, warnings: warnings.length };
   } catch (err) {
-    const error = err instanceof Error ? err.message : String(err);
+    const error = formatSyncError(err);
     await sb
       .from("sync_log")
       .update({ finished_at: new Date().toISOString(), status: "error", error_message: error })
       .eq("id", logId);
     return { ok: false, planningRows: 0, experimentsRows: 0, warnings: 0, error };
+  }
+}
+
+function formatSyncError(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (typeof err === "string") return err;
+  try {
+    return JSON.stringify(err);
+  } catch {
+    return String(err);
   }
 }
 

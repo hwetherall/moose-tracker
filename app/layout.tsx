@@ -17,7 +17,7 @@ export default async function RootLayout({
 }) {
   const session = await auth();
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen">
         <AppShell user={session?.user ?? null}>{children}</AppShell>
         {drawer}

@@ -71,11 +71,20 @@ export async function pullFromSheets(aliases: AliasMap): Promise<SyncResult> {
 
   // Experiments: row 1 is headers
   const experimentsBody = experimentsRaw.slice(1);
-  const experiments: Experiment[] = [];
+  const experimentsByKey = new Map<string, Experiment>();
   for (let i = 0; i < experimentsBody.length; i++) {
     const item = normalizeExperimentRow(experimentsBody[i], i + 2, warnings);
-    if (item) experiments.push(item);
+    if (!item) continue;
+    if (experimentsByKey.has(item.key)) {
+      warnings.push({
+        kind: "other",
+        message: `Duplicate Experiment key ${item.key} at row ${item.sheetRow} — last-wins`,
+        context: { key: item.key, sheetRow: item.sheetRow }
+      });
+    }
+    experimentsByKey.set(item.key, item);
   }
+  const experiments = Array.from(experimentsByKey.values());
 
   // Cross-reference + parent-epic resolution run after both sets are built.
   const xref = crossReferenceExperiments(planningItems, experiments, warnings);
