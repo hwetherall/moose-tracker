@@ -21,31 +21,31 @@ export default async function SubsystemsPage() {
   return (
     <div>
       <div className="mb-3">
-        <h1 className="text-lg font-semibold tracking-tight text-ink">By Subsystem</h1>
+        <h2 className="font-serif text-section text-text-primary">By Subsystem</h2>
       </div>
-      <div className="overflow-x-auto rounded-md border border-paper-line bg-paper">
-        <table className="w-full text-sm">
-          <thead className="bg-paper-soft text-left text-xs uppercase tracking-wider text-ink-mute">
+      <div className="overflow-x-auto rounded-lg border border-border-subtle bg-bg-surface">
+        <table className="w-full text-body">
+          <thead className="bg-bg-muted text-left text-label uppercase tracking-[0.04em] text-text-tertiary">
             <tr>
-              <th className="px-3 py-2 font-medium">Subsystem</th>
+              <th className="px-3 py-2 font-normal">Subsystem</th>
               {COLUMNS.map((c) => (
-                <th key={c.label} className="px-3 py-2 font-medium text-right">{c.label}</th>
+                <th key={c.label} className="px-3 py-2 text-right font-normal">{c.label}</th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-paper-line">
+          <tbody className="divide-y divide-border-subtle">
             {names.map((sub) => (
-              <tr key={sub} className="hover:bg-paper-soft">
-                <td className="px-3 py-2 text-ink">{sub}</td>
+              <tr key={sub} className="hover:bg-bg-muted">
+                <td className="px-3 py-2 text-text-primary">{sub}</td>
                 {COLUMNS.map((c) => {
                   const count = countFor(sub, c.statuses);
                   const href = `/items${filtersToQuery({ subsystem: [sub === "Unassigned" ? "" : sub], status: c.statuses })}`;
                   return (
-                    <td key={c.label} className="px-3 py-2 text-right text-sm">
+                    <td key={c.label} className="px-3 py-2 text-right text-body tabular-nums">
                       {count === 0 ? (
-                        <span className="text-ink-mute">—</span>
+                        <span className="text-text-tertiary">—</span>
                       ) : (
-                        <Link href={href} className="text-ink hover:text-brand hover:underline">
+                        <Link href={href} className="text-text-primary hover:text-brand hover:underline">
                           {count}
                         </Link>
                       )}

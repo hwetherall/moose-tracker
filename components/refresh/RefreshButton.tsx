@@ -31,15 +31,15 @@ export function RefreshButton() {
 
   return (
     <div className="flex items-center gap-2">
-      {msg && <span className="text-xs text-ink-mute">{msg}</span>}
+      {msg && <span className="text-label text-text-tertiary">{msg}</span>}
       <button
         onClick={onClick}
         disabled={busy}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-md border border-paper-line bg-paper px-2.5 py-1.5 text-xs font-medium text-ink-soft hover:bg-paper-mute disabled:opacity-60"
+          "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-body text-text-secondary hover:bg-bg-muted hover:text-text-primary disabled:opacity-60"
         )}
       >
-        <RefreshCw className={cn("h-3.5 w-3.5", busy && "animate-spin")} />
+        <RefreshCw className={cn("h-3 w-3", busy && "animate-spin")} />
         {busy ? "Refreshing…" : "Refresh"}
       </button>
     </div>

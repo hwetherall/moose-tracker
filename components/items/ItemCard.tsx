@@ -1,89 +1,71 @@
 import Link from "next/link";
-import { ExternalLink, AlertCircle } from "lucide-react";
 import type { Row } from "@/lib/queries/planning";
 import { StatusDot } from "./StatusDot";
 import { TypeBadge } from "./TypeBadge";
 import { daysSince, daysUntil, formatDateShort } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { OwnerStack } from "./OwnerAvatar";
 
-function sheetDeepLink(sheetRow: number): string {
-  const id = process.env.MOOSE_SHEET_ID ?? "";
-  const gid = process.env.PLANNING_GID ?? "";
-  if (!id) return "#";
-  return `https://docs.google.com/spreadsheets/d/${id}/edit#gid=${gid}&range=A${sheetRow}`;
-}
-
-function shortNames(emails: string[]): string {
-  if (!emails.length) return "—";
-  const names = emails.map((e) => e.split("@")[0]);
-  return names.join(", ");
-}
-
-export function ItemCard({ row }: { row: Row }) {
+export function ItemCard({ row, compact = false, quoteBlocker = false }: { row: Row; compact?: boolean; quoteBlocker?: boolean }) {
   const due = daysUntil(row.due_date);
   const blockedDays = daysSince(row.blocked_since);
-  const showBlockedWarn = (blockedDays !== null && blockedDays >= 7) || !!row.blocker;
+  const showStuck = blockedDays !== null && blockedDays > 7;
+  const owners = row.r_emails.length ? row.r_emails : row.a_emails.length ? row.a_emails : row.d_emails;
 
   const dueClass =
     row.due_date && due !== null
       ? due < 0
-        ? "text-status-blocked"
+        ? "text-status-blocked-text"
         : due <= 7
-          ? "text-amber-600"
-          : "text-ink-mute"
-      : "text-ink-mute";
+          ? "text-status-discovery-text"
+          : "text-text-tertiary"
+      : "text-text-tertiary";
 
   return (
     <Link
       href={`/item/${row.id}`}
       prefetch={false}
-      className="block rounded-md border border-paper-line bg-paper p-3 hover:border-brand hover:shadow-sm transition"
+      className={cn(
+        "block border border-border-subtle bg-bg-surface transition-colors hover:border-border-medium dark:bg-bg-muted/45 dark:hover:bg-bg-muted/60",
+        compact ? "rounded-md px-3 py-2.5" : "rounded-lg px-4 py-3.5",
+        compact && row.status === "0-Done" && "bg-bg-muted opacity-75"
+      )}
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-1.5 text-xs text-ink-mute">
+        <div className="flex min-w-0 items-center gap-1.5 text-label text-text-tertiary">
           <span className="font-mono">#{row.id}</span>
           <TypeBadge type={row.type} />
-          {row.release && <span className="rounded bg-paper-mute px-1.5 py-0.5">{row.release}</span>}
+          {!compact && (row.category || row.subsystem) && (
+            <span className="truncate text-badge text-text-tertiary">
+              {[row.category, row.subsystem].filter(Boolean).join(" · ")}
+            </span>
+          )}
         </div>
-        <span className="text-[10px] font-mono text-ink-mute">Rank {row.rank_score ?? "—"}</span>
+        {showStuck && <span className="shrink-0 font-mono text-label text-status-blocked-text">stuck {blockedDays}d</span>}
       </div>
 
-      <div className="mt-1.5 text-sm font-medium text-ink leading-snug line-clamp-2">{row.name}</div>
+      <div className={cn("mt-1.5 line-clamp-2 text-text-primary", compact ? "text-compact" : "text-item")}>{row.name}</div>
 
-      {(row.category || row.subsystem) && (
-        <div className="mt-1 text-[11px] text-ink-mute">
-          {[row.category, row.subsystem].filter(Boolean).join(" · ")}
-        </div>
+      {quoteBlocker && row.blocker && (
+        <blockquote className="mt-2 border-l border-border-medium pl-3 text-compact italic text-text-secondary">
+          {row.blocker}
+        </blockquote>
       )}
 
-      <div className="mt-2 flex items-center gap-3 text-[11px] text-ink-soft">
-        <span>R: {shortNames(row.r_emails)}</span>
-        <span>A: {shortNames(row.a_emails)}</span>
-      </div>
-
-      <div className="mt-2 flex items-center justify-between text-[11px]">
-        <span className="inline-flex items-center gap-1.5">
-          <StatusDot status={row.status} />
-          <span className="text-ink-soft">{row.status}</span>
+      <div className="mt-2.5 flex items-center justify-between gap-3">
+        <OwnerStack emails={owners} size={compact ? 16 : 18} />
+        <span className="shrink-0 font-mono text-label text-text-tertiary">
+          {row.rank_score === null ? "no rank" : `Rank ${row.rank_score}`}
         </span>
-        <span className={cn(dueClass)}>{row.due_date ? `Due ${formatDateShort(row.due_date)}` : ""}</span>
       </div>
 
-      {showBlockedWarn && (
-        <div className="mt-2 flex items-center justify-between text-[11px]">
-          <span className="inline-flex items-center gap-1 text-status-blocked">
-            <AlertCircle className="h-3 w-3" />
-            {blockedDays !== null ? `Blocked ${blockedDays}d` : "Blocked"}
+      {!compact && (
+        <div className="mt-2 flex items-center justify-between text-label">
+          <span className="inline-flex items-center gap-1.5 text-text-secondary">
+            <StatusDot status={row.status} />
+            <span>{row.status}</span>
           </span>
-          <a
-            href={sheetDeepLink(row.sheet_row)}
-            target="_blank"
-            rel="noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="inline-flex items-center gap-0.5 text-ink-mute hover:text-ink"
-          >
-            Sheet <ExternalLink className="h-3 w-3" />
-          </a>
+          <span className={cn(dueClass)}>{row.due_date ? `Due ${formatDateShort(row.due_date)}` : ""}</span>
         </div>
       )}
     </Link>

@@ -40,7 +40,7 @@ export function FilterBar({
   );
 
   return (
-    <div className="mb-4 flex flex-wrap gap-2 rounded-md border border-paper-line bg-paper p-2">
+    <div className="mb-4 flex flex-wrap gap-2 border-b border-border-subtle pb-3">
       <Select label="Status" options={statuses.map((s) => ({ value: s }))} selected={current("status")} onChange={(v) => setMulti("status", v)} />
       <Select label="Type" options={types.map((s) => ({ value: s }))} selected={current("type")} onChange={(v) => setMulti("type", v)} />
       <Select label="Release" options={releases.map((s) => ({ value: s }))} selected={current("release")} onChange={(v) => setMulti("release", v)} />
@@ -59,7 +59,7 @@ export function FilterBar({
         current("subsystem").length ||
         current("owner").length) > 0 ? (
         <button
-          className="ml-auto rounded-md border border-paper-line bg-paper-soft px-2.5 py-1 text-xs text-ink-soft hover:bg-paper-mute"
+          className="ml-auto rounded-md bg-bg-muted px-2.5 py-1 text-label text-text-secondary hover:bg-bg-inset"
           onClick={() => router.push(pathname)}
         >
           Clear
@@ -82,16 +82,16 @@ function Select({
 }) {
   return (
     <details className="relative">
-      <summary className="cursor-pointer select-none list-none rounded-md border border-paper-line bg-paper-soft px-2.5 py-1 text-xs text-ink-soft hover:bg-paper-mute">
+      <summary className="cursor-pointer select-none list-none rounded-md border border-border-subtle bg-bg-surface px-2.5 py-1 text-label text-text-secondary hover:bg-bg-muted">
         {label}
-        {selected.length > 0 && <span className="ml-1 rounded bg-brand-soft px-1 text-brand">{selected.length}</span>}
+        {selected.length > 0 && <span className="ml-1 rounded-sm bg-brand-soft px-1 text-brand">{selected.length}</span>}
       </summary>
-      <div className="absolute z-20 mt-1 max-h-72 w-56 overflow-auto rounded-md border border-paper-line bg-paper p-1 shadow-sm">
-        {options.length === 0 && <div className="px-2 py-1 text-xs text-ink-mute">No options</div>}
+      <div className="absolute z-20 mt-1 max-h-72 w-56 overflow-auto rounded-md border border-border-subtle bg-bg-surface p-1 shadow-sm">
+        {options.length === 0 && <div className="px-2 py-1 text-label text-text-tertiary">No options</div>}
         {options.map((o) => {
           const on = selected.includes(o.value);
           return (
-            <label key={o.value} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-xs hover:bg-paper-mute">
+            <label key={o.value} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-label text-text-secondary hover:bg-bg-muted">
               <input
                 type="checkbox"
                 checked={on}

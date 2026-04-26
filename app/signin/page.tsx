@@ -17,12 +17,16 @@ async function SignInContent({
 }) {
   const { error, callbackUrl } = await searchParams;
   return (
-    <main className="min-h-screen grid place-items-center bg-paper-soft">
-      <div className="max-w-sm w-full rounded-lg border border-paper-line bg-paper p-6 shadow-sm">
-        <h1 className="text-lg font-semibold tracking-tight text-ink">Moose Dashboard</h1>
-        <p className="mt-1 text-sm text-ink-mute">Sign in with your @innovera.ai account.</p>
+    <main className="grid min-h-screen place-items-center bg-bg-page px-5">
+      <div className="w-full max-w-sm rounded-lg border border-border-subtle bg-bg-surface p-6">
+        <div className="mb-5 flex items-center gap-2">
+          <div className="flex h-[22px] w-[22px] items-center justify-center rounded-md bg-brand font-medium text-text-inverse">M</div>
+          <span className="font-serif text-[15px] font-medium text-text-primary">Moose</span>
+        </div>
+        <h1 className="font-serif text-page text-text-primary">Moose Dashboard</h1>
+        <p className="mt-1 text-body text-text-secondary">Sign in with your @innovera.ai account.</p>
         {error === "domain" && (
-          <p className="mt-3 text-sm text-status-blocked">
+          <p className="mt-3 text-body text-status-blocked-text">
             That account isn't in the innovera.ai workspace.
           </p>
         )}
@@ -35,7 +39,7 @@ async function SignInContent({
         >
           <button
             type="submit"
-            className="w-full rounded-md bg-brand px-3 py-2 text-sm font-medium text-white hover:brightness-95"
+            className="w-full rounded-md bg-brand px-3 py-2 text-body font-medium text-text-inverse hover:brightness-95"
           >
             Continue with Google
           </button>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { StatusDot } from "./StatusDot";
 import { TypeBadge } from "./TypeBadge";
+import { OwnerStack } from "./OwnerAvatar";
 import { daysSince, formatDateShort } from "@/lib/format";
 import type { Row } from "@/lib/queries/planning";
 import type { ExpRow } from "@/lib/queries/experiments";
@@ -20,11 +21,9 @@ function jiraLink(key: string): string {
 
 function ownerLine(label: string, emails: string[], raw: string | null) {
   return (
-    <div className="flex items-baseline gap-2 text-xs">
-      <span className="w-20 shrink-0 text-ink-mute">{label}</span>
-      <span className="text-ink-soft">
-        {emails.length ? emails.map((e) => e.split("@")[0]).join(", ") : (raw ?? "—")}
-      </span>
+    <div className="flex items-center gap-2 text-label">
+      <span className="w-20 shrink-0 text-text-tertiary">{label}</span>
+      {emails.length ? <OwnerStack emails={emails} size={18} /> : <span className="italic text-text-tertiary">{raw ?? "unassigned"}</span>}
     </div>
   );
 }
@@ -41,24 +40,24 @@ export function ItemDetail({
   children: Row[];
 }) {
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-start justify-between gap-3 border-b border-paper-line p-4">
+    <div className="flex h-full flex-col bg-bg-surface text-text-primary">
+      <div className="flex items-start justify-between gap-3 border-b border-border-subtle p-4">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 text-xs text-ink-mute">
+          <div className="flex items-center gap-2 text-label uppercase tracking-[0.04em] text-text-tertiary">
             <span className="font-mono">#{row.id}</span>
             <TypeBadge type={row.type} />
-            {row.release && <span className="rounded bg-paper-mute px-1.5 py-0.5">{row.release}</span>}
-            <span className="font-mono">Rank {row.rank_score ?? "—"}</span>
+            {row.release && <span className="rounded-sm bg-bg-muted px-1.5 py-0.5">{row.release}</span>}
+            <span className="font-mono">Rank {row.rank_score ?? "no rank"}</span>
           </div>
-          <h2 className="mt-1.5 text-base font-semibold text-ink leading-tight">{row.name}</h2>
-          <div className="mt-2 flex items-center gap-3 text-xs">
+          <h2 className="mt-1.5 font-serif text-[22px] font-medium leading-tight tracking-[-0.015em] text-text-primary">{row.name}</h2>
+          <div className="mt-2 flex items-center gap-3 text-label">
             <span className="inline-flex items-center gap-1.5">
               <StatusDot status={row.status} />
-              <span className="text-ink-soft">{row.status}</span>
+              <span className="text-text-secondary">{row.status}</span>
             </span>
-            {row.due_date && <span className="text-ink-mute">Due {formatDateShort(row.due_date)}</span>}
+            {row.due_date && <span className="text-text-tertiary">Due {formatDateShort(row.due_date)}</span>}
             {row.is_ready === true && (
-              <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] text-green-800">Ready</span>
+              <span className="rounded-sm bg-status-ready-soft px-1.5 py-0.5 text-badge text-status-ready-text">Ready</span>
             )}
           </div>
         </div>
@@ -66,66 +65,57 @@ export function ItemDetail({
           href={sheetDeepLink(row.sheet_row)}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex shrink-0 items-center gap-1 rounded-md border border-paper-line bg-paper px-2.5 py-1.5 text-xs text-ink-soft hover:bg-paper-mute"
+          className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border-subtle bg-bg-surface px-2.5 py-1.5 text-label text-text-secondary hover:bg-bg-muted"
         >
           Open in Sheet <ExternalLink className="h-3 w-3" />
         </a>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-5 scrollbar-thin">
-        <Section title="Ownership">
+      <div className="flex-1 space-y-5 overflow-y-auto p-4 scrollbar-thin">
+        <Section title="People">
           {ownerLine("Responsible", row.r_emails, row.r_raw)}
           {ownerLine("Accountable", row.a_emails, row.a_raw)}
           {ownerLine("Definer", row.d_emails, row.d_raw)}
         </Section>
 
-        <Section title="Classification">
-          <Field label="Category" value={row.category} />
-          <Field label="Subsystem" value={row.subsystem} />
-          <Field label="Seq" value={row.seq} />
-          <Field label="P / I / D" value={`${row.priority ?? "?"} / ${row.impact ?? "?"} / ${row.difficulty ?? "?"}`} />
+        <Section title="Metadata">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+            <Field label="Category" value={row.category} />
+            <Field label="Subsystem" value={row.subsystem} />
+            <Field label="Priority" value={row.priority?.toString()} />
+            <Field label="Impact" value={row.impact?.toString()} />
+            <Field label="Difficulty" value={row.difficulty?.toString()} />
+            <Field label="Rank Score" value={row.rank_score?.toString()} />
+            <Field label="Due Date" value={formatDateShort(row.due_date)} />
+            <Field label="Blocked Since" value={formatDateShort(row.blocked_since)} />
+          </div>
         </Section>
 
         {row.blocker || row.blocked_since ? (
           <Section title="Block">
-            <div className="rounded-md border border-status-blocked/30 bg-red-50 p-3 text-xs text-ink-soft">
-              <div>{row.blocker ?? "—"}</div>
+            <div className="rounded-md border border-border-subtle bg-status-blocked-soft p-3 text-compact text-text-secondary">
+              <div>{row.blocker ?? "unassigned"}</div>
               {row.blocked_since && (
-                <div className="mt-1 text-status-blocked">
-                  Blocked since {formatDateShort(row.blocked_since)}
-                  {" · "}
-                  {daysSince(row.blocked_since)}d
+                <div className="mt-1 text-status-blocked-text">
+                  Blocked since {formatDateShort(row.blocked_since)} · stuck {daysSince(row.blocked_since)}d
                 </div>
               )}
             </div>
           </Section>
         ) : null}
 
-        {row.dod && (
-          <Section title="Definition of Done">
-            <p className="whitespace-pre-wrap text-xs text-ink-soft">{row.dod}</p>
-          </Section>
-        )}
-
-        {row.comments && (
-          <Section title="Comments">
-            <p className="whitespace-pre-wrap text-xs text-ink-soft">{row.comments}</p>
-          </Section>
-        )}
-
         {row.links.length > 0 && (
           <Section title="Links">
             <div className="flex flex-wrap gap-1.5">
               {row.links.map((l) => {
-                const href =
-                  l.type === "jira_prmt" || l.type === "jira_inv" ? jiraLink(l.id) : "#";
+                const href = l.type === "jira_prmt" || l.type === "jira_inv" ? jiraLink(l.id) : "#";
                 return (
                   <a
                     key={l.raw}
                     href={href}
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-md border border-paper-line bg-paper-soft px-2 py-0.5 text-[11px] text-ink-soft hover:bg-paper-mute"
+                    className="rounded-md border border-border-subtle bg-bg-muted px-2 py-0.5 text-label text-text-secondary hover:bg-bg-inset"
                   >
                     {l.id}
                   </a>
@@ -139,13 +129,13 @@ export function ItemDetail({
           <Section title="Experiments">
             <div className="space-y-1.5">
               {experiments.map((e) => (
-                <div key={e.key} className="rounded-md border border-paper-line bg-paper p-2 text-xs">
+                <div key={e.key} className="rounded-md border border-border-subtle bg-bg-surface p-2 text-compact">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-ink-mute">{e.key}</span>
+                    <span className="font-mono text-text-tertiary">{e.key}</span>
                     <StatusDot status={e.status} />
-                    <span className="text-ink-soft">{e.status}</span>
+                    <span className="text-text-secondary">{e.status}</span>
                   </div>
-                  {e.experiment && <div className="mt-0.5 text-ink">{e.experiment}</div>}
+                  {e.experiment && <div className="mt-0.5 text-text-primary">{e.experiment}</div>}
                 </div>
               ))}
             </div>
@@ -153,13 +143,9 @@ export function ItemDetail({
         )}
 
         {parent && (
-          <Section title="Parent Epic">
-            <Link
-              href={`/item/${parent.id}`}
-              prefetch={false}
-              className="block rounded-md border border-paper-line bg-paper p-2 text-xs hover:bg-paper-mute"
-            >
-              <span className="font-mono text-ink-mute">#{parent.id}</span> <span className="text-ink">{parent.name}</span>
+          <Section title="Parent">
+            <Link href={`/item/${parent.id}`} prefetch={false} className="block rounded-md border border-border-subtle bg-bg-surface p-2 text-compact hover:bg-bg-muted">
+              <span className="font-mono text-text-tertiary">#{parent.id}</span> <span className="text-text-primary">{parent.name}</span>
             </Link>
           </Section>
         )}
@@ -168,16 +154,11 @@ export function ItemDetail({
           <Section title={`Children (${children.length})`}>
             <div className="space-y-1.5">
               {children.map((c) => (
-                <Link
-                  key={c.id}
-                  href={`/item/${c.id}`}
-                  prefetch={false}
-                  className="block rounded-md border border-paper-line bg-paper p-2 text-xs hover:bg-paper-mute"
-                >
+                <Link key={c.id} href={`/item/${c.id}`} prefetch={false} className="block rounded-md border border-border-subtle bg-bg-surface p-2 text-compact hover:bg-bg-muted">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-ink-mute">#{c.id}</span>
+                    <span className="font-mono text-text-tertiary">#{c.id}</span>
                     <StatusDot status={c.status} />
-                    <span className="text-ink">{c.name}</span>
+                    <span className="text-text-primary">{c.name}</span>
                   </div>
                 </Link>
               ))}
@@ -185,15 +166,27 @@ export function ItemDetail({
           </Section>
         )}
 
-        <details className="rounded-md border border-paper-line bg-paper-soft p-3">
-          <summary className="cursor-pointer text-xs font-medium text-ink-soft">Raw data</summary>
-          <div className="mt-2 space-y-1 text-[11px] text-ink-mute">
+        {row.dod && (
+          <Section title="Definition of Done">
+            <p className="whitespace-pre-wrap text-compact text-text-secondary">{row.dod}</p>
+          </Section>
+        )}
+
+        {row.comments && (
+          <Section title="Comments">
+            <p className="whitespace-pre-wrap text-compact text-text-secondary">{row.comments}</p>
+          </Section>
+        )}
+
+        <details className="rounded-md border border-border-subtle bg-bg-inset p-3">
+          <summary className="cursor-pointer text-label text-text-secondary">Raw data</summary>
+          <div className="mt-2 space-y-1 text-label text-text-tertiary">
             <Field label="status_raw" value={row.status_raw} mono />
             <Field label="r_raw" value={row.r_raw} mono />
             <Field label="a_raw" value={row.a_raw} mono />
             <Field label="d_raw" value={row.d_raw} mono />
-            <Field label="parent_epic" value={row.parent_epic} mono />
           </div>
+          <p className="mt-2 text-label text-text-tertiary">Spencer will normalize this.</p>
         </details>
       </div>
     </div>
@@ -203,7 +196,7 @@ export function ItemDetail({
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-ink-mute">{title}</h3>
+      <h3 className="mb-2 text-badge uppercase tracking-[0.04em] text-text-tertiary">{title}</h3>
       <div className="space-y-1.5">{children}</div>
     </div>
   );
@@ -211,9 +204,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Field({ label, value, mono }: { label: string; value: string | null | undefined; mono?: boolean }) {
   return (
-    <div className="flex items-baseline gap-2 text-xs">
-      <span className="w-20 shrink-0 text-ink-mute">{label}</span>
-      <span className={mono ? "font-mono text-ink-soft" : "text-ink-soft"}>{value ?? "—"}</span>
+    <div className="flex items-baseline gap-2 text-label">
+      <span className="w-20 shrink-0 text-text-tertiary">{label}</span>
+      <span className={mono ? "font-mono text-text-secondary" : "text-text-secondary"}>{value ?? "—"}</span>
     </div>
   );
 }

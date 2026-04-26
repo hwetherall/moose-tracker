@@ -20,8 +20,8 @@ export default async function ItemsPage({
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <h1 className="text-lg font-semibold tracking-tight text-ink">Items</h1>
-        <div className="text-xs text-ink-mute">{items.length} shown</div>
+        <h2 className="font-serif text-section text-text-primary">Items</h2>
+        <div className="text-label text-text-tertiary">{items.length} shown</div>
       </div>
       <FilterBar
         statuses={opts.statuses}
@@ -32,11 +32,11 @@ export default async function ItemsPage({
         people={people}
       />
       {items.length === 0 ? (
-        <div className="rounded-md border border-dashed border-paper-line bg-paper-soft p-8 text-center text-sm text-ink-mute">
+        <div className="rounded-md border border-dashed border-border-subtle bg-bg-muted p-8 text-center text-body text-text-tertiary">
           No items match these filters.
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+        <div className="space-y-3">
           {items.map((r) => (
             <ItemCard key={r.id} row={r} />
           ))}

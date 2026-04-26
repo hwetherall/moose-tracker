@@ -49,24 +49,24 @@ export default async function OwnersPage() {
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <h1 className="text-lg font-semibold tracking-tight text-ink">By Owner</h1>
+        <h2 className="font-serif text-section text-text-primary">By Owner</h2>
       </div>
-      <div className="overflow-x-auto rounded-md border border-paper-line bg-paper">
-        <table className="w-full text-sm">
-          <thead className="bg-paper-soft text-left text-xs uppercase tracking-wider text-ink-mute">
+      <div className="overflow-x-auto rounded-lg border border-border-subtle bg-bg-surface">
+        <table className="w-full text-body">
+          <thead className="bg-bg-muted text-left text-label uppercase tracking-[0.04em] text-text-tertiary">
             <tr>
-              <th className="px-3 py-2 font-medium">Person</th>
+              <th className="px-3 py-2 font-normal">Person</th>
               {COLUMNS.map((c) => (
-                <th key={c.label} className="px-3 py-2 font-medium text-right">
+                <th key={c.label} className="px-3 py-2 text-right font-normal">
                   {c.label}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-paper-line">
+          <tbody className="divide-y divide-border-subtle">
             {sortedRows.map(([email, name]) => (
-              <tr key={email} className="hover:bg-paper-soft">
-                <td className="px-3 py-2 text-ink">{name}</td>
+              <tr key={email} className="hover:bg-bg-muted">
+                <td className="px-3 py-2 text-text-primary">{name}</td>
                 {COLUMNS.map((c) => {
                   const count = countFor(email, c);
                   const href = `/items${filtersToQuery({
@@ -74,11 +74,11 @@ export default async function OwnersPage() {
                     status: c.statuses
                   })}`;
                   return (
-                    <td key={c.label} className="px-3 py-2 text-right text-sm">
+                    <td key={c.label} className="px-3 py-2 text-right text-body tabular-nums">
                       {count === 0 ? (
-                        <span className="text-ink-mute">—</span>
+                        <span className="text-text-tertiary">—</span>
                       ) : (
-                        <Link href={href} className="text-ink hover:text-brand hover:underline">
+                        <Link href={href} className="text-text-primary hover:text-brand hover:underline">
                           {count}
                         </Link>
                       )}
@@ -87,12 +87,12 @@ export default async function OwnersPage() {
                 })}
               </tr>
             ))}
-            <tr className="hover:bg-paper-soft">
-              <td className="px-3 py-2 text-ink-mute italic">Unassigned</td>
+            <tr className="hover:bg-bg-muted">
+              <td className="px-3 py-2 italic text-text-tertiary">Unassigned</td>
               {COLUMNS.map((c) => {
                 const count = countFor(null, c);
                 return (
-                  <td key={c.label} className="px-3 py-2 text-right text-sm text-ink-mute">
+                  <td key={c.label} className="px-3 py-2 text-right text-body tabular-nums text-text-tertiary">
                     {count === 0 ? "—" : count}
                   </td>
                 );

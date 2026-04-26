@@ -14,7 +14,7 @@ export default async function ItemPage({
   if (!row) notFound();
 
   return (
-    <div className="max-w-3xl rounded-md border border-paper-line bg-paper">
+    <div className="max-w-3xl rounded-md border border-border-subtle bg-bg-surface">
       <ItemDetail row={row} parent={parent} children={children} experiments={experiments} />
     </div>
   );

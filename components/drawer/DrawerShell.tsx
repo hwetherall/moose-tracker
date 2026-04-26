@@ -19,13 +19,13 @@ export function DrawerShell({ children }: { children: React.ReactNode }) {
       <button
         aria-label="Close"
         onClick={() => router.back()}
-        className="absolute inset-0 bg-ink/30 backdrop-blur-[1px]"
+        className="absolute inset-0 bg-text-primary/30 backdrop-blur-[1px]"
       />
-      <aside className="absolute right-0 top-0 h-full w-full max-w-xl border-l border-paper-line bg-paper shadow-xl">
+      <aside className="absolute right-0 top-0 h-full w-full max-w-[480px] border-l border-border-subtle bg-bg-surface shadow-xl">
         <button
           onClick={() => router.back()}
           aria-label="Close"
-          className="absolute right-3 top-3 z-10 inline-flex h-7 w-7 items-center justify-center rounded-md border border-paper-line bg-paper text-ink-soft hover:bg-paper-mute"
+          className="absolute right-3 top-3 z-10 inline-flex h-7 w-7 items-center justify-center rounded-md border border-border-subtle bg-bg-surface text-text-secondary hover:bg-bg-muted"
         >
           <X className="h-4 w-4" />
         </button>

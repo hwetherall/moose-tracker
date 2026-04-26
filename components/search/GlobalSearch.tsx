@@ -15,14 +15,14 @@ export function GlobalSearch() {
         if (!query) return;
         router.push(`/items?q=${encodeURIComponent(query)}`);
       }}
-      className="hidden md:flex items-center gap-1.5 rounded-md border border-paper-line bg-paper-soft px-2 py-1.5 w-64"
+      className="hidden w-[200px] items-center gap-1.5 rounded-md border border-border-subtle bg-bg-muted px-2 py-1.5 focus-within:border-brand md:flex"
     >
-      <Search className="h-3.5 w-3.5 text-ink-mute" />
+      <Search className="h-3.5 w-3.5 text-text-tertiary" />
       <input
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="Search items…"
-        className="flex-1 bg-transparent text-xs outline-none placeholder:text-ink-mute"
+        className="min-w-0 flex-1 bg-transparent text-body outline-none placeholder:text-text-tertiary"
       />
     </form>
   );

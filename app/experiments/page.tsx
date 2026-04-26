@@ -24,29 +24,29 @@ export default async function ExperimentsPage() {
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <h1 className="text-lg font-semibold tracking-tight text-ink">Experiments</h1>
-        <div className="text-xs text-ink-mute">{exps.length} total</div>
+        <h2 className="font-serif text-section text-text-primary">Experiments</h2>
+        <div className="text-label text-text-tertiary">{exps.length} total</div>
       </div>
       <div className="grid gap-3 overflow-x-auto scrollbar-thin" style={{ gridTemplateColumns: `repeat(${COLS.length}, minmax(260px, 1fr))` }}>
         {COLS.map((col) => {
           const cards = exps.filter((e) => col.statuses.includes(e.status));
           return (
-            <div key={col.label} className="min-w-0 rounded-md border border-paper-line bg-paper-soft p-2">
-              <div className="mb-2 flex items-center gap-2 px-1 text-xs text-ink-mute">
+            <div key={col.label} className="min-w-0 rounded-md border border-border-subtle bg-bg-muted p-2">
+              <div className="mb-2 flex items-center gap-2 px-1 text-label text-text-tertiary">
                 <StatusDot status={col.statuses[0]} />
-                <span className="font-medium text-ink">{col.label}</span>
+                <span className="text-text-primary">{col.label}</span>
                 <span>({cards.length})</span>
               </div>
               <div className="space-y-2">
                 {cards.map((e) => (
-                  <div key={e.key} className="rounded-md border border-paper-line bg-paper p-2.5 text-xs">
-                    <div className="flex items-center gap-1.5 text-ink-mute">
+                  <div key={e.key} className="rounded-md border border-border-subtle bg-bg-surface p-2.5 text-compact">
+                    <div className="flex items-center gap-1.5 text-text-tertiary">
                       <span className="font-mono">{e.key}</span>
                       <StatusDot status={e.status} />
                     </div>
-                    {e.experiment && <div className="mt-1 text-ink line-clamp-3">{e.experiment}</div>}
+                    {e.experiment && <div className="mt-1 line-clamp-3 text-text-primary">{e.experiment}</div>}
                     {e.problem && (
-                      <div className="mt-1 text-[11px] text-ink-mute">
+                      <div className="mt-1 text-label text-text-tertiary">
                         {e.problem_planning_id ? (
                           <Link href={`/item/${e.problem_planning_id}`} prefetch={false} className="hover:underline">
                             → {parentById.get(e.problem_planning_id) ?? e.problem}
@@ -58,7 +58,7 @@ export default async function ExperimentsPage() {
                     )}
                   </div>
                 ))}
-                {cards.length === 0 && <div className="px-1 py-2 text-[11px] text-ink-mute">—</div>}
+                {cards.length === 0 && <div className="px-1 py-2 text-label text-text-tertiary">—</div>}
               </div>
             </div>
           );

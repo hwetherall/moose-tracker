@@ -29,6 +29,7 @@ export function resolveOwners(
         seen.add(email);
       }
     } else {
+      console.warn(`Unknown owner alias "${part}" in "${raw}"`);
       warnings.push({
         kind: "unknown_alias",
         message: `Unknown owner alias "${part}" in "${raw}"`,

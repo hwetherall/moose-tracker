@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils";
 
 const MAP: Record<string, string> = {
-  Epic: "bg-violet-100 text-violet-800 border-violet-200",
-  Story: "bg-blue-100 text-blue-800 border-blue-200",
-  Task: "bg-slate-100 text-slate-700 border-slate-200"
+  Epic: "bg-type-epic-soft text-type-epic-text",
+  Story: "bg-type-story-soft text-type-story-text",
+  Task: "bg-type-task-soft text-type-task-text"
 };
 
 export function TypeBadge({ type }: { type: string | null }) {
@@ -11,8 +11,9 @@ export function TypeBadge({ type }: { type: string | null }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-medium",
-        MAP[type] ?? "bg-paper-mute text-ink-soft border-paper-line"
+        "inline-flex items-center rounded-sm border px-1.5 py-0.5 text-badge font-medium",
+        "border-transparent uppercase leading-none tracking-[0.02em]",
+        MAP[type] ?? "bg-bg-muted text-text-secondary"
       )}
     >
       {type}

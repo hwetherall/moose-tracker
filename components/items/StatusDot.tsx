@@ -14,7 +14,7 @@ const MAP: Record<string, string> = {
 };
 
 export function StatusDot({ status, className }: { status: string; className?: string }) {
-  return <span className={cn("inline-block h-2 w-2 rounded-full", MAP[status] ?? "bg-status-unknown", className)} aria-hidden />;
+  return <span className={cn("inline-block h-1.5 w-1.5 rounded-full", MAP[status] ?? "bg-status-unknown", className)} aria-hidden />;
 }
 
 export function statusLabel(status: string): string {

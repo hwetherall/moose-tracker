@@ -34,8 +34,8 @@ export default async function KanbanPage({
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <h1 className="text-lg font-semibold tracking-tight text-ink">Kanban</h1>
-        <div className="text-xs text-ink-mute">{items.length} items</div>
+        <h2 className="font-serif text-section text-text-primary">Kanban</h2>
+        <div className="text-label text-text-tertiary">{items.length} items</div>
       </div>
       <FilterBar
         statuses={opts.statuses}
@@ -47,14 +47,14 @@ export default async function KanbanPage({
       />
 
       {blocked.length > 0 && (
-        <details className="mb-4 rounded-md border border-status-blocked/30 bg-paper p-3">
-          <summary className="flex cursor-pointer items-center gap-2 text-sm font-medium text-status-blocked">
+        <details className="mb-4 rounded-md border border-border-subtle bg-status-blocked-soft p-3">
+          <summary className="flex cursor-pointer items-center gap-2 text-body text-status-blocked-text">
             <StatusDot status="0-Blocked" />
-            Blocked ({blocked.length})
+            {blocked.length} blocked items
           </summary>
           <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
             {blocked.map((r) => (
-              <ItemCard key={r.id} row={r} />
+              <ItemCard key={r.id} row={r} compact />
             ))}
           </div>
         </details>
@@ -64,17 +64,17 @@ export default async function KanbanPage({
         {COLS.map((col) => {
           const cards = nonBlocked.filter((i) => col.statuses.includes(i.status));
           return (
-            <div key={col.label} className="min-w-0 rounded-md border border-paper-line bg-paper-soft p-2">
-              <div className="mb-2 flex items-center gap-2 px-1 text-xs text-ink-mute">
+            <div key={col.label} className="min-w-0 rounded-md border border-border-subtle bg-bg-muted p-2">
+              <div className="mb-2 flex items-center gap-2 px-1 text-label text-text-tertiary">
                 <StatusDot status={col.statuses[0]} />
-                <span className="font-medium text-ink">{col.label}</span>
+                <span className="text-text-primary">{col.label}</span>
                 <span>({cards.length})</span>
               </div>
               <div className="space-y-2">
                 {cards.map((r) => (
-                  <ItemCard key={r.id} row={r} />
+                  <ItemCard key={r.id} row={r} compact />
                 ))}
-                {cards.length === 0 && <div className="px-1 py-2 text-[11px] text-ink-mute">—</div>}
+                {cards.length === 0 && <div className="px-1 py-2 text-label text-text-tertiary">—</div>}
               </div>
             </div>
           );

@@ -4,10 +4,14 @@
 
 html,
 body {
-  background-color: theme("colors.paper.soft");
-  color: theme("colors.ink.DEFAULT");
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  background-color: var(--color-bg-page);
+  color: var(--color-text-primary);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum";
   -webkit-font-smoothing: antialiased;
+}
+
+* {
+  border-color: var(--color-border-subtle);
 }
 
 /* Thin scrollbars for kanban columns */
@@ -16,6 +20,6 @@ body {
   height: 8px;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: theme("colors.paper.line");
+  background: var(--color-bg-inset);
   border-radius: 4px;
 }

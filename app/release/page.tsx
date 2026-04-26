@@ -17,8 +17,8 @@ export default async function ReleasePage() {
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <h1 className="text-lg font-semibold tracking-tight text-ink">Release</h1>
-        <div className="text-xs text-ink-mute">{items.length} items</div>
+        <h2 className="font-serif text-section text-text-primary">Release</h2>
+        <div className="text-label text-text-tertiary">{items.length} items</div>
       </div>
       <div className="grid gap-3 overflow-x-auto scrollbar-thin" style={{ gridTemplateColumns: `repeat(${columnNames.length}, minmax(260px, 1fr))` }}>
         {columnNames.map((name) => {
@@ -31,23 +31,23 @@ export default async function ReleasePage() {
             <div
               key={name}
               className={cn(
-                "min-w-0 rounded-md border bg-paper-soft p-2",
-                slipped ? "border-status-blocked/40" : "border-paper-line"
+                "min-w-0 rounded-md border bg-bg-muted p-2",
+                slipped ? "border-status-blocked-text/40" : "border-border-subtle"
               )}
             >
               <ReleaseHeader name={name} rel={rel} slipped={slipped} count={colItems.length} />
               <div className="space-y-2">
                 {inFlight.map((r) => (
-                  <ItemCard key={r.id} row={r} />
+                  <ItemCard key={r.id} row={r} compact />
                 ))}
-                {inFlight.length === 0 && <div className="px-1 py-1 text-[11px] text-ink-mute">—</div>}
+                {inFlight.length === 0 && <div className="px-1 py-1 text-label text-text-tertiary">—</div>}
               </div>
               {done.length > 0 && (
-                <details className="mt-2 rounded-md bg-paper p-2 text-xs text-ink-mute">
+                <details className="mt-2 rounded-md bg-bg-surface p-2 text-label text-text-tertiary">
                   <summary className="cursor-pointer">Done ({done.length})</summary>
                   <div className="mt-2 space-y-2">
                     {done.map((r) => (
-                      <ItemCard key={r.id} row={r} />
+                      <ItemCard key={r.id} row={r} compact />
                     ))}
                   </div>
                 </details>
@@ -88,16 +88,16 @@ function ReleaseHeader({
   return (
     <div className="mb-2 px-1">
       <div className="flex items-center gap-2">
-        <span className={cn("font-medium", slipped ? "text-status-blocked" : "text-ink")}>{name}</span>
-        <span className="text-xs text-ink-mute">({count})</span>
+        <span className={cn("font-serif text-section", slipped ? "text-status-blocked-text" : "text-text-primary")}>{name}</span>
+        <span className="text-label text-text-tertiary">({count})</span>
       </div>
       {(planned || revised || actual) && (
-        <div className="mt-0.5 text-[10px] text-ink-mute">
+        <div className="mt-0.5 text-label text-text-secondary">
           {planned && <>planned {formatDateShort(planned)}</>}
           {revised && <> → revised {formatDateShort(revised)}</>}
           {actual && <> · shipped {formatDateShort(actual)}</>}
           {slipDays !== null && slipDays !== 0 && (
-            <span className={slipDays > 0 ? "text-status-blocked" : "text-status-done"}>
+            <span className={slipDays > 0 ? "text-status-blocked-text" : "text-status-done-text"}>
               {" "}
               ({slipDays > 0 ? "+" : ""}
               {slipDays}d)

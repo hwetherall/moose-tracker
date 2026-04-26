@@ -39,7 +39,8 @@ export async function fetchPlanningItems(filters: Filters): Promise<Row[]> {
   let q = sb
     .from("planning_items")
     .select("*")
-    .order("rank_score", { ascending: true, nullsFirst: false });
+    .order("rank_score", { ascending: true, nullsFirst: false })
+    .order("due_date", { ascending: true, nullsFirst: false });
   if (filters.status?.length) q = q.in("status", filters.status);
   if (filters.category?.length) q = q.in("category", filters.category);
   if (filters.subsystem?.length) q = q.in("subsystem", filters.subsystem);
