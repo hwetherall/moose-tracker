@@ -1,4 +1,4 @@
-import { fetchPlanningItems, fetchFilterOptions } from "@/lib/queries/planning";
+import { ACTIVE_STATUSES, fetchPlanningItems, fetchFilterOptions } from "@/lib/queries/planning";
 import { fetchPeople } from "@/lib/queries/releases";
 import { parseFilters } from "@/lib/queries/filters";
 import { ItemCard } from "@/components/items/ItemCard";
@@ -11,23 +11,26 @@ export default async function ItemsPage({
 }) {
   const sp = await searchParams;
   const filters = parseFilters(sp);
-  const [items, opts, people] = await Promise.all([
+  const [allItems, opts, people] = await Promise.all([
     fetchPlanningItems(filters),
     fetchFilterOptions(),
     fetchPeople()
   ]);
+  const priorityStatuses = new Set<string>(ACTIVE_STATUSES);
+  const items = allItems.filter((item) => priorityStatuses.has(item.status));
+  const priorityStatusOptions = opts.statuses.filter((status) => priorityStatuses.has(status));
 
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
         <h2 className="font-serif text-section text-text-primary">Items</h2>
         <div className="flex items-center gap-3 text-label">
-          <span className="text-text-secondary">Sorted by priority ↓</span>
+          <span className="text-text-secondary">Ordered by Seq</span>
           <span className="text-text-tertiary">{items.length} shown</span>
         </div>
       </div>
       <FilterBar
-        statuses={opts.statuses}
+        statuses={priorityStatusOptions}
         types={opts.types}
         releases={opts.releases}
         categories={opts.categories}

@@ -6,7 +6,6 @@ import { ItemCard } from "@/components/items/ItemCard";
 import { StatusDot } from "@/components/items/StatusDot";
 import { TypeBadge } from "@/components/items/TypeBadge";
 import { OwnerAvatar } from "@/components/items/OwnerAvatar";
-import { PriorityPill, priorityValue } from "@/components/items/PriorityPill";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { SignalsGrid } from "@/components/signals/SignalsGrid";
 import { BriefCard } from "@/components/agent/BriefCard";
@@ -31,13 +30,6 @@ export default async function OverviewPage() {
 
   const activeItems = items.filter((i) => (ACTIVE_STATUSES as readonly string[]).includes(i.status));
   const active = activeItems.length;
-  const priorityCounts = activeItems.reduce(
-    (acc, item) => {
-      if (item.priority === 1 || item.priority === 2 || item.priority === 3) acc[item.priority] += 1;
-      return acc;
-    },
-    { 1: 0, 2: 0, 3: 0 } as Record<1 | 2 | 3, number>
-  );
   const blocked = items.filter((i) => i.status === "0-Blocked" || !!i.blocker);
   const dueWithin7 = items.filter((i) => {
     if (DONE_STATUSES.includes(i.status)) return false;
@@ -129,7 +121,7 @@ export default async function OverviewPage() {
               : undefined
           }
         />
-        <Stat label="Active items" value={active} hint={<PriorityBreakdown counts={priorityCounts} />} />
+        <Stat label="Active items" value={active} hint="items in flight" />
         <Stat label="Blocked" value={blocked.length} accent={blocked.length > 0 ? "blocked" : undefined} />
         <Stat label="Due this week" value={dueWithin7} accent={dueWithin7 > 0 ? "warn" : undefined} />
         <Stat
@@ -142,12 +134,12 @@ export default async function OverviewPage() {
       <section>
         <SectionHeader
           title="Top priorities"
-          subtitle="Active items, ranked by Spencer's priority score"
+          subtitle="Ordered by Seq (sheet column D)"
           linkHref="/items"
           linkText="See all priorities"
         />
         {topPriorities.length === 0 ? (
-          <Empty>No ranked active items right now.</Empty>
+          <Empty>No sequenced items right now.</Empty>
         ) : (
           <div className="space-y-2">
             {topPriorities.map((row, index) => (
@@ -262,36 +254,12 @@ function Stat({
   );
 }
 
-function PriorityBreakdown({ counts }: { counts: Record<1 | 2 | 3, number> }) {
-  const segments = [
-    { key: 1 as const, label: "P1", className: "text-priority-p1-text" },
-    { key: 2 as const, label: "P2", className: "text-priority-p2-text" },
-    { key: 3 as const, label: "P3", className: "text-priority-p3-text" }
-  ].filter((segment) => counts[segment.key] > 0);
-
-  if (!segments.length) return <>items in flight</>;
-
-  return (
-    <span className="inline-flex flex-wrap items-center gap-x-1.5">
-      {segments.map((segment, index) => (
-        <span key={segment.key} className="inline-flex items-center gap-x-1.5">
-          {index > 0 && <span className="text-text-tertiary">·</span>}
-          <span className={segment.className}>
-            {counts[segment.key]} {segment.label}
-          </span>
-        </span>
-      ))}
-    </span>
-  );
-}
-
 function TopPriorityRow({ row, ordinal }: { row: Row; ordinal: number }) {
   const due = daysUntil(row.due_date);
   const blockedDays = daysSince(row.blocked_since);
   const isBlocked = row.status === "0-Blocked" || !!row.blocker;
   const ownerEmail = row.r_emails[0] ?? null;
   const ownerFirst = ownerEmail ? displayNameForEmail(ownerEmail).split(" ")[0] : null;
-  const dimBody = row.priority === 3;
   const dueClass =
     row.due_date && due !== null
       ? due < 0
@@ -312,13 +280,13 @@ function TopPriorityRow({ row, ordinal }: { row: Row; ordinal: number }) {
         className="min-w-0 flex-1 rounded-md border border-border-subtle bg-bg-surface px-3 py-2 transition-colors hover:border-border-medium dark:bg-bg-muted/45 dark:hover:bg-bg-muted/60"
       >
         <div className="flex min-h-5 min-w-0 items-center gap-2">
-          <div className={cn("flex min-w-0 flex-1 items-center gap-1.5", dimBody && "opacity-[0.78]")}>
+          <div className="flex min-w-0 flex-1 items-center gap-1.5">
             <span className="shrink-0 font-mono text-label tabular-nums text-text-tertiary">#{row.id}</span>
             <TypeBadge type={row.type} />
             <span className="min-w-0 truncate text-compact text-text-primary">{row.name}</span>
           </div>
           <div className="flex shrink-0 items-center gap-3">
-            <div className={cn("flex items-center gap-3 text-label", dimBody && "opacity-[0.78]")}>
+            <div className="flex items-center gap-3 text-label">
               <span className="inline-flex items-center gap-1.5 text-text-secondary">
                 <StatusDot status={row.status} />
                 <span>{row.status}</span>
@@ -337,7 +305,6 @@ function TopPriorityRow({ row, ordinal }: { row: Row; ordinal: number }) {
                 <span className={cn("hidden md:inline", dueClass)}>{formatDateShort(row.due_date)}</span>
               ) : null}
             </div>
-            <PriorityPill priority={priorityValue(row.priority)} rankScore={row.rank_score} size="compact" />
           </div>
         </div>
       </Link>

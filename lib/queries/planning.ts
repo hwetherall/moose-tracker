@@ -1,4 +1,5 @@
 import { supabaseServer } from "@/lib/supabase/server";
+import { compareSeqPriority } from "@/lib/seq";
 import type { Filters } from "./filters";
 
 export const ACTIVE_STATUSES = [
@@ -47,11 +48,7 @@ export type Row = {
 
 export async function fetchPlanningItems(filters: Filters): Promise<Row[]> {
   const sb = supabaseServer();
-  let q = sb
-    .from("planning_items")
-    .select("*")
-    .order("rank_score", { ascending: true, nullsFirst: false })
-    .order("due_date", { ascending: true, nullsFirst: false });
+  let q = sb.from("planning_items").select("*");
   if (filters.status?.length) q = q.in("status", filters.status);
   if (filters.category?.length) q = q.in("category", filters.category);
   if (filters.subsystem?.length) q = q.in("subsystem", filters.subsystem);
@@ -73,6 +70,7 @@ export async function fetchPlanningItems(filters: Filters): Promise<Row[]> {
         r.d_emails.some((e) => set.has(e))
     );
   }
+  rows.sort(compareByPriority);
   return rows;
 }
 
@@ -82,23 +80,17 @@ export async function fetchTopPriorities(limit = 10): Promise<Row[]> {
     .from("planning_items")
     .select("*")
     .in("status", [...ACTIVE_STATUSES])
-    .not("rank_score", "is", null)
-    .order("rank_score", { ascending: true, nullsFirst: false })
-    .order("due_date", { ascending: true, nullsFirst: false })
-    .limit(limit);
+    .not("seq", "is", null)
+    .neq("seq", "")
+    .limit(2000);
   if (error) throw error;
-  return (data ?? []) as Row[];
+  const rows = (data ?? []) as Row[];
+  rows.sort(compareByPriority);
+  return rows.slice(0, limit);
 }
 
 export function compareByPriority(a: Row, b: Row): number {
-  const rankDelta = (a.rank_score ?? Number.MAX_SAFE_INTEGER) - (b.rank_score ?? Number.MAX_SAFE_INTEGER);
-  if (rankDelta !== 0) return rankDelta;
-
-  const dueA = a.due_date ? new Date(a.due_date).getTime() : Number.MAX_SAFE_INTEGER;
-  const dueB = b.due_date ? new Date(b.due_date).getTime() : Number.MAX_SAFE_INTEGER;
-  if (dueA !== dueB) return dueA - dueB;
-
-  return a.id - b.id;
+  return compareSeqPriority(a, b);
 }
 
 export async function fetchPlanningById(id: number): Promise<Row | null> {

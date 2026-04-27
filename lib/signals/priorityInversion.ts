@@ -1,22 +1,37 @@
 import type { SignalCheck } from "./types";
+import { seqValue } from "@/lib/seq";
 
-const HIGH_RANK_CUTOFF = 200;
-const LOW_RANK_CUTOFF = 230;
 const HASH_REF = /#(\d+)/g;
 
+// Percentile cutoff over a sorted ascending array. Returns +Infinity for empty
+// input so callers gracefully no-op (nothing is "in the top quartile").
+function percentile(sortedAsc: number[], p: number): number {
+  if (sortedAsc.length === 0) return Number.POSITIVE_INFINITY;
+  const idx = Math.min(Math.floor(sortedAsc.length * p), sortedAsc.length - 1);
+  return sortedAsc[idx];
+}
+
 /**
- * Fires when a high-priority item (rank ≤ 200) has a blocker text
- * referencing an item that is itself low-priority (rank ≥ 230) or in Backlog.
+ * Fires when a top-quartile item (by Seq) has a blocker text referencing an
+ * item that is itself bottom-quartile (by Seq) or in Backlog.
  *
- * Blocker text is freetext, but commonly references items as `#26`. We extract
- * those refs and look them up in the snapshot.
+ * Cutoffs are derived from the active snapshot's Seq distribution rather than
+ * fixed magic numbers, so this stays sensible as the queue grows.
  */
 export const priorityInversion: SignalCheck = ({ items }) => {
   const byId = new Map(items.map((i) => [i.id, i]));
   const findings: ReturnType<SignalCheck> = [];
 
+  const seqs = items
+    .map((i) => seqValue(i.seq))
+    .filter((n) => Number.isFinite(n))
+    .sort((a, b) => a - b);
+  const highCutoff = percentile(seqs, 0.25);
+  const lowCutoff = percentile(seqs, 0.75);
+
   for (const item of items) {
-    if (item.rank_score === null || item.rank_score > HIGH_RANK_CUTOFF) continue;
+    const itemSeq = seqValue(item.seq);
+    if (!Number.isFinite(itemSeq) || itemSeq > highCutoff) continue;
     if (!item.blocker) continue;
 
     const refs = Array.from(item.blocker.matchAll(HASH_REF))
@@ -26,16 +41,17 @@ export const priorityInversion: SignalCheck = ({ items }) => {
     for (const refId of refs) {
       const dep = byId.get(refId);
       if (!dep) continue;
-      const isLowRank = dep.rank_score !== null && dep.rank_score >= LOW_RANK_CUTOFF;
+      const depSeq = seqValue(dep.seq);
+      const isLowSeq = Number.isFinite(depSeq) && depSeq >= lowCutoff;
       const isBacklog = dep.status === "5-Backlog";
-      if (!isLowRank && !isBacklog) continue;
+      if (!isLowSeq && !isBacklog) continue;
 
-      const condition = isBacklog ? "is in Backlog" : `is rank ${dep.rank_score}`;
+      const condition = isBacklog ? "is in Backlog" : `has Seq ${dep.seq}`;
       findings.push({
         id: `priority-inversion:${item.id}->${refId}`,
         severity: "warning",
         title: "Priority inversion",
-        body: `#${item.id} (rank ${item.rank_score}) is blocked by #${refId} which ${condition}. Promote the blocker, or accept the slip.`,
+        body: `#${item.id} (Seq ${item.seq}) is blocked by #${refId} which ${condition}. Promote the blocker, or accept the slip.`,
         affectedItemIds: [item.id, refId],
         actionLabel: "Open item",
         actionHref: `/item/${item.id}`

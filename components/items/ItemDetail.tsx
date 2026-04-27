@@ -56,7 +56,7 @@ export function ItemDetail({
             <span className="font-mono">#{row.id}</span>
             <TypeBadge type={row.type} />
             {row.release && <span className="rounded-sm bg-bg-muted px-1.5 py-0.5">{row.release}</span>}
-            <span className="font-mono">Rank {row.rank_score ?? "no rank"}</span>
+            <span className="font-mono">Seq {row.seq ?? "—"}</span>
           </div>
           <h2 className="mt-1.5 font-serif text-[22px] font-medium leading-tight tracking-[-0.015em] text-text-primary">{row.name}</h2>
           {row.synced_at && (
@@ -126,10 +126,10 @@ export function ItemDetail({
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
             <Field label="Category" value={row.category} />
             <Field label="Subsystem" value={row.subsystem} />
+            <Field label="Seq" value={row.seq} />
             <Field label="Priority" value={row.priority?.toString()} />
             <Field label="Impact" value={row.impact?.toString()} />
             <Field label="Difficulty" value={row.difficulty?.toString()} />
-            <Field label="Rank Score" value={row.rank_score?.toString()} />
             <Field label="Due Date" value={formatDateShort(row.due_date)} />
             <Field label="Blocked Since" value={formatDateShort(row.blocked_since)} />
           </div>

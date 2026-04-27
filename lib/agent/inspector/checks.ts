@@ -155,33 +155,6 @@ export const malformedJiraLink: InspectorCheck = (ctx) => {
   return out;
 };
 
-// 6. Rank score arithmetic — rank_score != P*100 + I*10 + D when all three set.
-export const rankScoreArithmetic: InspectorCheck = (ctx) => {
-  const out: InspectorFinding[] = [];
-  for (const item of ctx.items) {
-    if (
-      item.priority == null ||
-      item.impact == null ||
-      item.difficulty == null ||
-      item.rank_score == null
-    ) {
-      continue;
-    }
-    const expected = item.priority * 100 + item.impact * 10 + item.difficulty;
-    if (item.rank_score === expected) continue;
-    out.push(
-      f(
-        "rank-score-arithmetic",
-        "warning",
-        item.id,
-        "Rank score doesn't match P/I/D",
-        `Rank ${item.rank_score} but P*100+I*10+D = ${expected}.`
-      )
-    );
-  }
-  return out;
-};
-
 // 7. Blocked without blocker text.
 export const blockedWithoutBlocker: InspectorCheck = (ctx) => {
   const out: InspectorFinding[] = [];

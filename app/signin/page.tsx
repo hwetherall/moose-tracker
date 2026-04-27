@@ -16,6 +16,7 @@ async function SignInContent({
   searchParams: Promise<{ error?: string; callbackUrl?: string }>;
 }) {
   const { error, callbackUrl } = await searchParams;
+  const redirectTo = callbackUrl?.startsWith("/") && !callbackUrl.startsWith("//") ? callbackUrl : "/";
   return (
     <main className="grid min-h-screen place-items-center bg-bg-page px-5">
       <div className="w-full max-w-sm rounded-lg border border-border-subtle bg-bg-surface p-6">
@@ -33,7 +34,7 @@ async function SignInContent({
         <form
           action={async () => {
             "use server";
-            await signIn("google", { redirectTo: callbackUrl ?? "/" });
+            await signIn("google", { redirectTo });
           }}
           className="mt-6"
         >
