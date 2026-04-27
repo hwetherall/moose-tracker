@@ -20,10 +20,10 @@ async function SignInContent({
     <main className="grid min-h-screen place-items-center bg-bg-page px-5">
       <div className="w-full max-w-sm rounded-lg border border-border-subtle bg-bg-surface p-6">
         <div className="mb-5 flex items-center gap-2">
-          <div className="flex h-[22px] w-[22px] items-center justify-center rounded-md bg-brand font-medium text-text-inverse">M</div>
-          <span className="font-serif text-[15px] font-medium text-text-primary">Moose</span>
+          <div className="flex h-[22px] w-[22px] items-center justify-center rounded-md bg-brand font-medium text-text-inverse">A</div>
+          <span className="font-serif text-[15px] font-medium text-text-primary">Antler</span>
         </div>
-        <h1 className="font-serif text-page text-text-primary">Moose Dashboard</h1>
+        <h1 className="font-serif text-page text-text-primary">Antler</h1>
         <p className="mt-1 text-body text-text-secondary">Sign in with your @innovera.ai account.</p>
         {error === "domain" && (
           <p className="mt-3 text-body text-status-blocked-text">

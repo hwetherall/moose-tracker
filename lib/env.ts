@@ -17,5 +17,6 @@ export const env = {
   supabaseAnonKey: () => req("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
   supabaseServiceRoleKey: () => req("SUPABASE_SERVICE_ROLE_KEY"),
   cronSecret: () => req("CRON_SECRET"),
-  jiraBaseUrl: () => process.env.JIRA_BASE_URL ?? "https://innovera.atlassian.net/browse"
+  jiraBaseUrl: () => process.env.JIRA_BASE_URL ?? "https://innovera.atlassian.net/browse",
+  openrouterKey: () => req("OPENROUTER_API_KEY")
 };

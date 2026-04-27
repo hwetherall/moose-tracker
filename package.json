@@ -1,5 +1,5 @@
 {
-  "name": "moose-dashboard",
+  "name": "antler",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -18,11 +18,11 @@
     "date-fns": "^4.1.0",
     "googleapis": "^144.0.0",
     "lucide-react": "^0.454.0",
-    "next": "15.0.3",
+    "next": "16.2.4",
     "next-auth": "5.0.0-beta.25",
     "next-themes": "^0.4.6",
-    "react": "19.0.0-rc-66855b96-20241106",
-    "react-dom": "19.0.0-rc-66855b96-20241106",
+    "react": "19.2.5",
+    "react-dom": "19.2.5",
     "swr": "^2.2.5",
     "tailwind-merge": "^2.5.4",
     "zod": "^3.23.8"

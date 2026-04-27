@@ -21,8 +21,8 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Moose Dashboard",
-  description: "Innovera Moose Tracker — read-only exec dashboard"
+  title: "Antler",
+  description: "Antler — Innovera planning surface over the Moose Tracker"
 };
 
 export default async function RootLayout({

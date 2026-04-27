@@ -2,12 +2,14 @@ import { supabaseService } from "@/lib/supabase/server";
 import { pullFromSheets } from "@/lib/sheets/adapter";
 import type { AliasMap } from "@/lib/normalize/owners";
 import type { Experiment, NormalizationWarning, PlanningItem, Release } from "@/lib/types";
+import { loadPriorState, recordTransitions } from "./transitions";
 
 /**
  * Full sync job. Runs on the Vercel cron and /api/refresh.
  * Idempotent per run — returns early if another run is already in progress.
+ * Pass `force` to skip the in-progress lockout (used after a write to reconcile immediately).
  */
-export async function runSync(): Promise<{
+export async function runSync(opts: { force?: boolean } = {}): Promise<{
   ok: boolean;
   planningRows: number;
   experimentsRows: number;
@@ -17,17 +19,19 @@ export async function runSync(): Promise<{
 }> {
   const sb = supabaseService();
 
-  // Skip if a run started within the last 4 min and hasn't finished
-  const { data: running } = await sb
-    .from("sync_log")
-    .select("id, started_at, finished_at")
-    .is("finished_at", null)
-    .order("started_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  if (!opts.force) {
+    // Skip if a run started within the last 4 min and hasn't finished
+    const { data: running } = await sb
+      .from("sync_log")
+      .select("id, started_at, finished_at")
+      .is("finished_at", null)
+      .order("started_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-  if (running && Date.now() - new Date(running.started_at as string).getTime() < 4 * 60_000) {
-    return { ok: true, planningRows: 0, experimentsRows: 0, warnings: 0, skipped: true };
+    if (running && Date.now() - new Date(running.started_at as string).getTime() < 4 * 60_000) {
+      return { ok: true, planningRows: 0, experimentsRows: 0, warnings: 0, skipped: true };
+    }
   }
 
   const { data: logRow, error: logErr } = await sb
@@ -40,8 +44,13 @@ export async function runSync(): Promise<{
 
   try {
     const aliases = await loadAliases(sb);
+    const prior = await loadPriorState(sb);
     const { planning, experiments, releases, warnings } = await pullFromSheets(aliases);
     await writeCache(sb, planning, experiments, releases);
+    // Transition detection runs after the cache is written so a downstream
+    // failure here doesn't lose the cache update; if it throws we still mark
+    // the sync as errored so the next run retries.
+    await recordTransitions(sb, prior, planning, logId);
     await sb
       .from("sync_log")
       .update({

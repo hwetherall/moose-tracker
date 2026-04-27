@@ -10,7 +10,8 @@ import {
   AlertCircle,
   Users,
   Layers,
-  FlaskConical
+  FlaskConical,
+  Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useSWR from "swr";
@@ -19,6 +20,7 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 const items = [
   { href: "/",            label: "Overview",   icon: LayoutGrid, exact: true },
+  { href: "/signals",     label: "Signals",    icon: Sparkles },
   { href: "/items",       label: "Items",      icon: List },
   { href: "/kanban",      label: "Kanban",     icon: Columns3 },
   { href: "/release",     label: "Release",    icon: Calendar },
@@ -28,9 +30,14 @@ const items = [
   { href: "/experiments", label: "Experiments", icon: FlaskConical }
 ];
 
+type OwnerLoad = { email: string; display_name: string; count: number };
+
 export function SideNav() {
   const pathname = usePathname();
   const { data } = useSWR<{ count: number }>("/api/blocked-count", fetcher, { refreshInterval: 30_000 });
+  const { data: ownerLoad } = useSWR<{ owners: OwnerLoad[] }>("/api/owner-load", fetcher, {
+    refreshInterval: 60_000
+  });
   return (
     <nav className="flex-1">
       <div className="mb-2 px-2 text-label uppercase tracking-[0.04em] text-text-tertiary">Views</div>
@@ -38,10 +45,19 @@ export function SideNav() {
         {items.map((it) => {
           const active = it.exact ? pathname === it.href : pathname === it.href || pathname.startsWith(it.href + "/");
           const Icon = it.icon;
+          const isOwners = it.href === "/owners";
+          const tooltip =
+            isOwners && ownerLoad?.owners.length
+              ? ownerLoad.owners
+                  .slice(0, 3)
+                  .map((o) => `${o.display_name} ${o.count}`)
+                  .join("  ·  ")
+              : undefined;
           return (
             <li key={it.href}>
               <Link
                 href={it.href}
+                title={tooltip}
                 className={cn(
                   "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
                   active

@@ -2,6 +2,7 @@ import { Header } from "./Header";
 import { SideNav } from "./SideNav";
 import { LastSyncedFooter } from "./LastSyncedFooter";
 import { SyncBanner } from "./SyncBanner";
+import { ChatLauncher } from "@/components/chat/ChatLauncher";
 
 export function AppShell({
   children,
@@ -15,9 +16,9 @@ export function AppShell({
       <aside className="hidden w-[200px] shrink-0 flex-col border-r border-border-subtle bg-bg-muted px-3.5 py-5 md:flex">
         <div className="mb-8 flex items-center gap-2 px-1">
           <div className="flex h-[22px] w-[22px] items-center justify-center rounded-md bg-brand font-medium text-text-inverse">
-            M
+            A
           </div>
-          <span className="font-serif text-[15px] font-medium text-text-primary">Moose</span>
+          <span className="font-serif text-[15px] font-medium text-text-primary">Antler</span>
         </div>
           <SideNav />
           <LastSyncedFooter />
@@ -27,6 +28,7 @@ export function AppShell({
         <Header user={user} />
         <div className="px-5 py-7 md:px-9">{children}</div>
       </main>
+      <ChatLauncher />
     </div>
   );
 }

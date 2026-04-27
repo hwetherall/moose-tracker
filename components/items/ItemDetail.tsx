@@ -50,6 +50,11 @@ export function ItemDetail({
             <span className="font-mono">Rank {row.rank_score ?? "no rank"}</span>
           </div>
           <h2 className="mt-1.5 font-serif text-[22px] font-medium leading-tight tracking-[-0.015em] text-text-primary">{row.name}</h2>
+          {row.synced_at && (
+            <div className="mt-0.5 text-label text-text-tertiary">
+              Last updated {formatDateShort(row.synced_at)}
+            </div>
+          )}
           <div className="mt-2 flex items-center gap-3 text-label">
             <span className="inline-flex items-center gap-1.5">
               <StatusDot status={row.status} />

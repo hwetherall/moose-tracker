@@ -3,6 +3,7 @@ import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { RefreshButton } from "@/components/refresh/RefreshButton";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
+import { NewItemButton } from "@/components/items/NewItemButton";
 import { HeaderTitle } from "./HeaderTitle";
 
 export function Header({
@@ -14,12 +15,13 @@ export function Header({
     <header className="border-b border-border-subtle bg-bg-page px-5 py-4 md:px-9">
       <div className="flex items-end justify-between gap-4">
         <div className="min-w-0">
-          <Link href="/" className="sr-only">Moose</Link>
+          <Link href="/" className="sr-only">Antler</Link>
           <HeaderTitle />
         </div>
         <div className="flex items-center gap-2">
           <GlobalSearch />
           <RefreshButton />
+          <NewItemButton />
           {user?.email ? (
             <div className="flex items-center gap-2 rounded-full border border-border-subtle bg-bg-surface py-1 pl-1 pr-2">
               <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-brand text-label font-medium text-text-inverse">

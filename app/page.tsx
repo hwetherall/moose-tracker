@@ -4,16 +4,20 @@ import { fetchReleases } from "@/lib/queries/releases";
 import { ItemCard } from "@/components/items/ItemCard";
 import { StatusDot } from "@/components/items/StatusDot";
 import { SectionHeader } from "@/components/layout/SectionHeader";
+import { SignalsGrid } from "@/components/signals/SignalsGrid";
+import { getSignals } from "@/lib/signals";
+import { displayNameForEmail } from "@/lib/people";
 import { daysSince, daysUntil, formatDateShort } from "@/lib/format";
 
 const ACTIVE_STATUSES = ["1-InDev", "1-InDevPrompt", "2-ReadyForDev", "3-Discovery", "3-Design", "4-Experiment"];
 const DONE_STATUSES = ["0-Done"];
 
 export default async function OverviewPage() {
-  const [session, items, releases] = await Promise.all([
+  const [session, items, releases, signals] = await Promise.all([
     auth(),
     fetchPlanningItems({}),
-    fetchReleases()
+    fetchReleases(),
+    getSignals()
   ]);
   const userEmail = session?.user?.email ?? "";
 
@@ -61,9 +65,28 @@ export default async function OverviewPage() {
         .slice(0, 10)
     : [];
 
+  const ownerCounts = new Map<string, number>();
+  for (const item of items) {
+    if (!ACTIVE_STATUSES.includes(item.status)) continue;
+    for (const e of new Set([...item.r_emails, ...item.a_emails])) {
+      ownerCounts.set(e, (ownerCounts.get(e) ?? 0) + 1);
+    }
+  }
+  const topOwner = Array.from(ownerCounts.entries()).sort((a, b) => b[1] - a[1])[0] ?? null;
+
+  const releaseTypeCounts = new Map<string, number>();
+  for (const item of releaseItems) {
+    const t = item.type ?? "Other";
+    releaseTypeCounts.set(t, (releaseTypeCounts.get(t) ?? 0) + 1);
+  }
+  const releaseComposition = Array.from(releaseTypeCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([type, count]) => `${count} ${type}`)
+    .join(" · ");
+
   return (
     <div className="space-y-9">
-      <section className="grid overflow-hidden rounded-xl border border-border-subtle bg-bg-surface md:grid-cols-[1.1fr_1fr_1fr_1fr]">
+      <section className="grid overflow-hidden rounded-xl border border-border-subtle bg-bg-surface md:grid-cols-[1.1fr_1fr_1fr_1fr_1fr]">
         <Stat
           label={`Release ${currentRelease ?? "none"}`}
           value={slipDays !== null && slipDays > 0 ? "At risk" : currentRelease ? "On track" : "No release"}
@@ -81,7 +104,14 @@ export default async function OverviewPage() {
         <Stat label="Active items" value={active} />
         <Stat label="Blocked" value={blocked.length} accent={blocked.length > 0 ? "blocked" : undefined} />
         <Stat label="Due this week" value={dueWithin7} accent={dueWithin7 > 0 ? "warn" : undefined} />
+        <Stat
+          label="Top owner"
+          value={topOwner ? displayNameForEmail(topOwner[0]) : "—"}
+          hint={topOwner ? `${topOwner[1]} active items` : undefined}
+        />
       </section>
+
+      <SignalsGrid signals={signals} />
 
       <section>
         <SectionHeader title="Blocked" linkHref="/blocked" linkText={`See all ${blocked.length}`} dense />
@@ -100,9 +130,18 @@ export default async function OverviewPage() {
         <SectionHeader
           title={`This release${currentRelease ? ` — ${currentRelease}` : ""}`}
           subtitle={
-            currentReleaseMeta?.planned_prod
-              ? `Planned ${formatDateShort(currentReleaseMeta.planned_prod)} · ${releaseItems.length} items`
-              : `${releaseItems.length} items`
+            <span className="inline-flex flex-wrap items-center gap-2">
+              <span>
+                {currentReleaseMeta?.planned_prod
+                  ? `Planned ${formatDateShort(currentReleaseMeta.planned_prod)} · ${releaseItems.length} items`
+                  : `${releaseItems.length} items`}
+              </span>
+              {releaseComposition && (
+                <span className="rounded-sm bg-bg-muted px-1.5 py-0.5 text-badge text-text-secondary">
+                  {releaseComposition}
+                </span>
+              )}
+            </span>
           }
           linkHref={`/release${currentRelease ? `?release=${currentRelease}` : ""}`}
           linkText="See full release"

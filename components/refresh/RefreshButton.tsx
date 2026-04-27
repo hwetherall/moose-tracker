@@ -1,14 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSWRConfig } from "swr";
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function RefreshButton() {
   const [busy, setBusy] = useState(false);
+  const [pendingSync, setPendingSync] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const { mutate } = useSWRConfig();
+
+  useEffect(() => {
+    function handler(e: Event) {
+      const detail = (e as CustomEvent<boolean>).detail;
+      setPendingSync(Boolean(detail));
+    }
+    window.addEventListener("moose:sync-pending", handler);
+    return () => window.removeEventListener("moose:sync-pending", handler);
+  }, []);
+
+  const spinning = busy || pendingSync;
 
   async function onClick() {
     if (busy) return;
@@ -39,8 +51,8 @@ export function RefreshButton() {
           "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-body text-text-secondary hover:bg-bg-muted hover:text-text-primary disabled:opacity-60"
         )}
       >
-        <RefreshCw className={cn("h-3 w-3", busy && "animate-spin")} />
-        {busy ? "Refreshing…" : "Refresh"}
+        <RefreshCw className={cn("h-3 w-3", spinning && "animate-spin")} />
+        {busy ? "Refreshing…" : pendingSync ? "Syncing…" : "Refresh"}
       </button>
     </div>
   );

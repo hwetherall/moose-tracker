@@ -32,6 +32,7 @@ export type Row = {
   blocker: string | null;
   blocked_since: string | null;
   is_ready: boolean | null;
+  synced_at: string | null;
 };
 
 export async function fetchPlanningItems(filters: Filters): Promise<Row[]> {

@@ -9,7 +9,9 @@
       "Bash(echo \"EXIT=$?\")",
       "Bash(pnpm build *)",
       "Bash(echo \"TSEXIT=$?\")",
-      "Bash(echo \"BUILDEXIT=$?\")"
+      "Bash(echo \"BUILDEXIT=$?\")",
+      "PowerShell(pnpm build *)",
+      "Bash(npx --no-install next build)"
     ]
   }
 }

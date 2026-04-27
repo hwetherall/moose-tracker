@@ -95,11 +95,97 @@ export async function pullFromSheets(aliases: AliasMap): Promise<SyncResult> {
   return { planning, experiments: xref.experiments, releases, warnings };
 }
 
+export type NewPlanningInput = {
+  id: number;
+  name: string;
+  release: string | null;
+  status: string;
+  type: string | null;
+  category: string | null;
+  subsystem: string | null;
+  parentEpic: string | null;
+  priority: number;
+  impact: number;
+  difficulty: number;
+  rankScore: number;
+  rEmails: string[];
+  aEmails: string[];
+  dEmails: string[];
+  dueDate: string | null;
+  comments: string | null;
+  dod: string | null;
+};
+
 /**
- * V1.5 placeholder. Wire when chat/new-item ships.
+ * Append a single row to the bottom of Planning.
+ *
+ * We do NOT use `values.append` with a range like A:Y — Sheets's table-detection
+ * gets confused by the trailing auto-formula in column Y ("Is Ready?") and ends
+ * up appending to the very last row of the sheet, sometimes shifted to a column
+ * that is NOT A. Instead we anchor explicitly: read column A to find the next
+ * empty row after the data block, then `values.update` that exact range.
+ *
+ * `valueInputOption: USER_ENTERED` keeps the sheet's auto-formula columns alive.
  */
-export async function writeToPlanningBottom(_row: unknown): Promise<{ id: number }> {
-  throw new Error("writeToPlanningBottom not implemented until V1.5");
+export async function appendPlanningRow(input: NewPlanningInput, displayNames: Map<string, string>): Promise<void> {
+  const sheets = sheetsClient();
+  const lookup = (e: string) => displayNames.get(e) ?? e;
+  const namesOf = (emails: string[]) => emails.map(lookup).join("/");
+
+  // Column order per CLAUDE.md §4.1 (24 columns, A through X):
+  //  1 id | 2 name | 3 release | 4 seq | 5 status | 6 type | 7 category | 8 subsystem |
+  //  9 parent | 10 links | 11 rank_score | 12 priority | 13 impact | 14 experiments |
+  // 15 difficulty | 16 r | 17 a | 18 d | 19 due | 20 comments | 21 dod | 22 blocker |
+  // 23 blocked_since | 24 is_ready
+  const row = [
+    input.id,
+    input.name,
+    input.release ?? "",
+    "",
+    input.status,
+    input.type ?? "",
+    input.category ?? "",
+    input.subsystem ?? "",
+    input.parentEpic ?? "",
+    "",
+    input.rankScore,
+    input.priority,
+    input.impact,
+    "",
+    input.difficulty,
+    namesOf(input.rEmails),
+    namesOf(input.aEmails),
+    namesOf(input.dEmails),
+    input.dueDate ?? "",
+    input.comments ?? "",
+    input.dod ?? "",
+    "",
+    "",
+    ""
+  ];
+
+  // Find the next empty row by reading column A only. The header is in row 1.
+  const idColRes = await sheets.spreadsheets.values.get({
+    spreadsheetId: env.mooseSheetId(),
+    range: "Planning!A:A",
+    valueRenderOption: "UNFORMATTED_VALUE"
+  });
+  const idCol = (idColRes.data.values as unknown[][]) ?? [];
+  let lastIdRow = 1; // header row
+  for (let i = 0; i < idCol.length; i++) {
+    const v = idCol[i]?.[0];
+    if (v !== undefined && v !== null && v !== "") {
+      lastIdRow = i + 1; // values is 0-indexed; sheet rows are 1-indexed
+    }
+  }
+  const targetRow = lastIdRow + 1;
+
+  await sheets.spreadsheets.values.update({
+    spreadsheetId: env.mooseSheetId(),
+    range: `Planning!A${targetRow}:X${targetRow}`,
+    valueInputOption: "USER_ENTERED",
+    requestBody: { values: [row] }
+  });
 }
 
 /**

@@ -10,7 +10,8 @@ const TITLES: Record<string, string> = {
   "/blocked": "Blocked",
   "/owners": "By owner",
   "/subsystems": "By subsystem",
-  "/experiments": "Experiments"
+  "/experiments": "Experiments",
+  "/signals": "Signals"
 };
 
 export function HeaderTitle() {
@@ -26,7 +27,7 @@ export function HeaderTitle() {
     <div>
       <div className="text-label uppercase tracking-[0.04em] text-text-tertiary">Innovera</div>
       <h1 className="font-serif text-page text-text-primary">{title}</h1>
-      <p className="mt-1 text-body text-text-secondary">{date} · Moose tracker cache</p>
+      <p className="mt-1 text-body text-text-secondary">{date} · Antler over the Moose Tracker</p>
     </div>
   );
 }
