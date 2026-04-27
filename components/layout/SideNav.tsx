@@ -11,7 +11,8 @@ import {
   Users,
   Layers,
   FlaskConical,
-  Sparkles
+  Sparkles,
+  Inbox
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useSWR from "swr";
@@ -20,6 +21,7 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 const items = [
   { href: "/",            label: "Overview",   icon: LayoutGrid, exact: true },
+  { href: "/inbox",       label: "Inbox",      icon: Inbox },
   { href: "/signals",     label: "Signals",    icon: Sparkles },
   { href: "/items",       label: "Items",      icon: List },
   { href: "/kanban",      label: "Kanban",     icon: Columns3 },
@@ -36,6 +38,9 @@ export function SideNav() {
   const pathname = usePathname();
   const { data } = useSWR<{ count: number }>("/api/blocked-count", fetcher, { refreshInterval: 30_000 });
   const { data: ownerLoad } = useSWR<{ owners: OwnerLoad[] }>("/api/owner-load", fetcher, {
+    refreshInterval: 60_000
+  });
+  const { data: proposalCount } = useSWR<{ count: number }>("/api/agent/proposal-count", fetcher, {
     refreshInterval: 60_000
   });
   return (
@@ -69,6 +74,11 @@ export function SideNav() {
                 {it.label}
                 {it.href === "/blocked" && (
                   <span className="ml-auto rounded-lg bg-bg-inset px-1.5 text-label text-text-tertiary">{data?.count ?? 0}</span>
+                )}
+                {it.href === "/inbox" && proposalCount && proposalCount.count > 0 && (
+                  <span className="ml-auto rounded-lg bg-brand-soft px-1.5 text-label text-brand">
+                    {proposalCount.count}
+                  </span>
                 )}
               </Link>
             </li>

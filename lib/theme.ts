@@ -20,6 +20,11 @@ export const light = {
     primary: "#8B5A3C",
     primarySoft: "#F0E4D9"
   },
+  priority: {
+    p1: { text: "#8C4A1F", bg: "#F4E6D8" },
+    p2: { text: "#5C5A54", bg: "#F4F2EC" },
+    p3: { text: "#8E8B82", bg: "transparent" }
+  },
   status: {
     done: { dot: "#3B6D11", soft: "#EAF3DE", text: "#27500A" },
     inDev: { dot: "#185FA5", soft: "#E6F1FB", text: "#0C447C" },
@@ -58,6 +63,11 @@ export const dark = {
   brand: {
     primary: "#B0795A",
     primarySoft: "#3D2E22"
+  },
+  priority: {
+    p1: { text: "#D9A073", bg: "#3A2A1F" },
+    p2: { text: "#A8A59C", bg: "#2C2A26" },
+    p3: { text: "#75726A", bg: "transparent" }
   },
   status: {
     done: { dot: "#97C459", soft: "#27500A", text: "#C0DD97" },

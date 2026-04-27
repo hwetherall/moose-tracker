@@ -9,6 +9,10 @@ import { rowHash } from "./hash";
  * Turn a raw Planning sheet row (array indexed by column) into a PlanningItem.
  * Returns null for rows without a name (empty trailing rows).
  * `sheetRow` is 1-indexed — the row number in the sheet, used for deep links.
+ *
+ * Column 25 ("AI Brief", index 24) is the round-trip column added in V2 — the
+ * agent writes briefs there post-approval, and a sheet-side edit shows up here
+ * as the source of truth for that field per the V1 "sheet wins" principle.
  */
 export function normalizePlanningRow(
   row: unknown[],
@@ -69,5 +73,6 @@ export function normalizePlanningRow(
     isReady: parseSheetBool(row[23])
   };
 
-  return { ...partial, rowHash: rowHash(partial) };
+  const aiBriefFromSheet = asText(row[24]); // col 25 ("AI Brief"), V2 round-trip column
+  return { ...partial, rowHash: rowHash(partial), aiBriefFromSheet };
 }

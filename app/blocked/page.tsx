@@ -1,4 +1,4 @@
-import { fetchPlanningItems } from "@/lib/queries/planning";
+import { compareByPriority, fetchPlanningItems } from "@/lib/queries/planning";
 import { ItemCard } from "@/components/items/ItemCard";
 
 export default async function BlockedPage() {
@@ -8,7 +8,7 @@ export default async function BlockedPage() {
     .sort((a, b) => {
       const da = a.blocked_since ? new Date(a.blocked_since).getTime() : -Infinity;
       const db = b.blocked_since ? new Date(b.blocked_since).getTime() : -Infinity;
-      return db - da;
+      return db - da || compareByPriority(a, b);
     });
 
   return (

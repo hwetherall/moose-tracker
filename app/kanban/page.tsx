@@ -1,4 +1,4 @@
-import { fetchFilterOptions, fetchPlanningItems } from "@/lib/queries/planning";
+import { compareByPriority, fetchFilterOptions, fetchPlanningItems } from "@/lib/queries/planning";
 import { fetchPeople } from "@/lib/queries/releases";
 import { parseFilters } from "@/lib/queries/filters";
 import { ItemCard } from "@/components/items/ItemCard";
@@ -28,7 +28,7 @@ export default async function KanbanPage({
     fetchPeople()
   ]);
 
-  const blocked = items.filter((i) => i.status === "0-Blocked");
+  const blocked = items.filter((i) => i.status === "0-Blocked").sort(compareByPriority);
   const nonBlocked = items.filter((i) => i.status !== "0-Blocked");
 
   return (
@@ -62,7 +62,7 @@ export default async function KanbanPage({
 
       <div className="grid gap-3 overflow-x-auto scrollbar-thin" style={{ gridTemplateColumns: "repeat(6, minmax(260px, 1fr))" }}>
         {COLS.map((col) => {
-          const cards = nonBlocked.filter((i) => col.statuses.includes(i.status));
+          const cards = nonBlocked.filter((i) => col.statuses.includes(i.status)).sort(compareByPriority);
           return (
             <div key={col.label} className="min-w-0 rounded-md border border-border-subtle bg-bg-muted p-2">
               <div className="mb-2 flex items-center gap-2 px-1 text-label text-text-tertiary">

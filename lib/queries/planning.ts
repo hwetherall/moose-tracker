@@ -1,6 +1,15 @@
 import { supabaseServer } from "@/lib/supabase/server";
 import type { Filters } from "./filters";
 
+export const ACTIVE_STATUSES = [
+  "0-Blocked",
+  "1-InDev",
+  "1-InDevPrompt",
+  "2-ReadyForDev",
+  "3-Discovery",
+  "4-Experiment"
+] as const;
+
 export type Row = {
   id: number;
   sheet_row: number;
@@ -32,6 +41,7 @@ export type Row = {
   blocker: string | null;
   blocked_since: string | null;
   is_ready: boolean | null;
+  ai_brief_from_sheet: string | null;
   synced_at: string | null;
 };
 
@@ -64,6 +74,31 @@ export async function fetchPlanningItems(filters: Filters): Promise<Row[]> {
     );
   }
   return rows;
+}
+
+export async function fetchTopPriorities(limit = 10): Promise<Row[]> {
+  const sb = supabaseServer();
+  const { data, error } = await sb
+    .from("planning_items")
+    .select("*")
+    .in("status", [...ACTIVE_STATUSES])
+    .not("rank_score", "is", null)
+    .order("rank_score", { ascending: true, nullsFirst: false })
+    .order("due_date", { ascending: true, nullsFirst: false })
+    .limit(limit);
+  if (error) throw error;
+  return (data ?? []) as Row[];
+}
+
+export function compareByPriority(a: Row, b: Row): number {
+  const rankDelta = (a.rank_score ?? Number.MAX_SAFE_INTEGER) - (b.rank_score ?? Number.MAX_SAFE_INTEGER);
+  if (rankDelta !== 0) return rankDelta;
+
+  const dueA = a.due_date ? new Date(a.due_date).getTime() : Number.MAX_SAFE_INTEGER;
+  const dueB = b.due_date ? new Date(b.due_date).getTime() : Number.MAX_SAFE_INTEGER;
+  if (dueA !== dueB) return dueA - dueB;
+
+  return a.id - b.id;
 }
 
 export async function fetchPlanningById(id: number): Promise<Row | null> {

@@ -30,6 +30,20 @@ const config: Config = {
           DEFAULT: "var(--color-brand-primary)",
           soft: "var(--color-brand-primary-soft)"
         },
+        priority: {
+          p1: {
+            text: "var(--color-priority-p1-text)",
+            bg: "var(--color-priority-p1-bg)"
+          },
+          p2: {
+            text: "var(--color-priority-p2-text)",
+            bg: "var(--color-priority-p2-bg)"
+          },
+          p3: {
+            text: "var(--color-priority-p3-text)",
+            bg: "var(--color-priority-p3-bg)"
+          }
+        },
         ink: {
           DEFAULT: "var(--color-text-primary)",
           soft: "var(--color-text-secondary)",

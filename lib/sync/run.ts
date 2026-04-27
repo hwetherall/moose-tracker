@@ -140,6 +140,7 @@ async function writeCache(
       blocker: p.blocker,
       blocked_since: p.blockedSince,
       is_ready: p.isReady,
+      ai_brief_from_sheet: p.aiBriefFromSheet ?? null,
       row_hash: p.rowHash,
       synced_at: new Date().toISOString()
     }));

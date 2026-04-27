@@ -63,6 +63,9 @@ export const PlanningItemSchema = z.object({
   blocker: z.string().nullable(),
   blockedSince: z.string().nullable(),   // ISO date
   isReady: z.boolean().nullable(),
+  /** V2: column 25 ("AI Brief") on the Planning sheet. Source of truth when set
+   *  per the "sheet wins" principle. The agent writes here post-approval. */
+  aiBriefFromSheet: z.string().nullable().optional(),
   rowHash: z.string()
 });
 export type PlanningItem = z.infer<typeof PlanningItemSchema>;

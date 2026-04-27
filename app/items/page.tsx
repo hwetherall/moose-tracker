@@ -21,7 +21,10 @@ export default async function ItemsPage({
     <div>
       <div className="mb-3 flex items-center justify-between">
         <h2 className="font-serif text-section text-text-primary">Items</h2>
-        <div className="text-label text-text-tertiary">{items.length} shown</div>
+        <div className="flex items-center gap-3 text-label">
+          <span className="text-text-secondary">Sorted by priority ↓</span>
+          <span className="text-text-tertiary">{items.length} shown</span>
+        </div>
       </div>
       <FilterBar
         statuses={opts.statuses}
@@ -37,8 +40,15 @@ export default async function ItemsPage({
         </div>
       ) : (
         <div className="space-y-3">
-          {items.map((r) => (
-            <ItemCard key={r.id} row={r} />
+          {items.map((r, index) => (
+            <div key={r.id} className="flex items-start gap-2">
+              <div className="w-7 shrink-0 pt-3.5 text-right font-mono text-[12px] leading-none tabular-nums text-text-tertiary">
+                {index + 1}.
+              </div>
+              <div className="min-w-0 flex-1">
+                <ItemCard row={r} />
+              </div>
+            </div>
           ))}
         </div>
       )}

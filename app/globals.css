@@ -23,3 +23,31 @@ body {
   background: var(--color-bg-inset);
   border-radius: 4px;
 }
+
+/* Brief markdown rendering. Quiet, editorial, no shadcn defaults. */
+.prose-brief h2 {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+  margin-top: 16px;
+  margin-bottom: 6px;
+}
+.prose-brief h2:first-child {
+  margin-top: 0;
+}
+.prose-brief p {
+  margin: 0 0 10px;
+}
+.prose-brief ul {
+  margin: 0 0 10px;
+  padding-left: 18px;
+  list-style: disc;
+}
+.prose-brief li {
+  margin-bottom: 3px;
+}
+.prose-brief li::marker {
+  color: var(--color-text-tertiary);
+}

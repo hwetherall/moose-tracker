@@ -6,6 +6,9 @@ import { OwnerStack } from "./OwnerAvatar";
 import { daysSince, formatDateShort } from "@/lib/format";
 import type { Row } from "@/lib/queries/planning";
 import type { ExpRow } from "@/lib/queries/experiments";
+import type { FindingRow, ItemEnrichmentRow, ProposalRow } from "@/lib/agent/types";
+import { EnrichmentSection } from "@/components/agent/EnrichedField";
+import { InspectorFindingList } from "@/components/agent/InspectorBadge";
 
 function sheetDeepLink(sheetRow: number): string {
   const id = process.env.MOOSE_SHEET_ID ?? "";
@@ -32,12 +35,18 @@ export function ItemDetail({
   row,
   experiments,
   parent,
-  children
+  children,
+  enrichment,
+  pendingProposals,
+  findings
 }: {
   row: Row;
   experiments: ExpRow[];
   parent: Row | null;
   children: Row[];
+  enrichment?: ItemEnrichmentRow | null;
+  pendingProposals?: ProposalRow[];
+  findings?: FindingRow[];
 }) {
   return (
     <div className="flex h-full flex-col bg-bg-surface text-text-primary">
@@ -77,6 +86,36 @@ export function ItemDetail({
       </div>
 
       <div className="flex-1 space-y-5 overflow-y-auto p-4 scrollbar-thin">
+        {(() => {
+          const approvedBrief = enrichment?.brief_approved_at ? enrichment?.brief : null;
+          const sheetBrief = row.ai_brief_from_sheet;
+          const briefText = approvedBrief ?? sheetBrief ?? null;
+          if (!briefText) return null;
+          const divergence =
+            approvedBrief && sheetBrief && approvedBrief !== sheetBrief;
+          return (
+            <div className="rounded-md border border-border-subtle bg-bg-surface p-3">
+              <div className="text-badge uppercase tracking-[0.04em] text-text-tertiary">Brief</div>
+              <p className="mt-1 whitespace-pre-wrap text-compact text-text-secondary">{briefText}</p>
+              {divergence && (
+                <div className="mt-2 text-label text-text-tertiary">
+                  Edited in sheet — sheet wins.
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        <EnrichmentSection
+          itemId={row.id}
+          enrichment={enrichment ?? null}
+          pending={(pendingProposals ?? []).filter((p) => p.proposal_type === "enrichment")}
+        />
+
+        {findings && findings.length > 0 && (
+          <InspectorFindingList findings={findings} />
+        )}
+
         <Section title="People">
           {ownerLine("Responsible", row.r_emails, row.r_raw)}
           {ownerLine("Accountable", row.a_emails, row.a_raw)}

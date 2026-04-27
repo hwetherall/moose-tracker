@@ -1,10 +1,19 @@
-import { fetchPlanningItems } from "@/lib/queries/planning";
+import { compareByPriority, fetchPlanningItems } from "@/lib/queries/planning";
 import { fetchReleases, type ReleaseRow } from "@/lib/queries/releases";
 import { ItemCard } from "@/components/items/ItemCard";
+import { StatusDot } from "@/components/items/StatusDot";
 import { formatDateShort } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const ORDER = ["R14", "R15", "R16.1", "R16.2", "R17", "R18"];
+const STATUS_GROUPS: { label: string; statuses: string[] }[] = [
+  { label: "0-Blocked", statuses: ["0-Blocked"] },
+  { label: "1-InDev", statuses: ["1-InDev", "1-InDevPrompt"] },
+  { label: "2-ReadyForDev", statuses: ["2-ReadyForDev"] },
+  { label: "3-Discovery", statuses: ["3-Discovery", "3-Design"] },
+  { label: "4-Experiment", statuses: ["4-Experiment"] },
+  { label: "5-Backlog", statuses: ["5-Backlog", "0-?"] }
+];
 
 export default async function ReleasePage() {
   const [items, releases] = await Promise.all([fetchPlanningItems({}), fetchReleases()]);
@@ -25,7 +34,7 @@ export default async function ReleasePage() {
           const rel = byName.get(name);
           const colItems = items.filter((i) => (name === "Unassigned" ? !i.release : i.release === name));
           const inFlight = colItems.filter((i) => i.status !== "0-Done");
-          const done = colItems.filter((i) => i.status === "0-Done");
+          const done = colItems.filter((i) => i.status === "0-Done").sort(compareByPriority);
           const slipped = isSlipped(rel, inFlight.length);
           return (
             <div
@@ -37,9 +46,22 @@ export default async function ReleasePage() {
             >
               <ReleaseHeader name={name} rel={rel} slipped={slipped} count={colItems.length} />
               <div className="space-y-2">
-                {inFlight.map((r) => (
-                  <ItemCard key={r.id} row={r} compact />
-                ))}
+                {STATUS_GROUPS.map((group) => {
+                  const groupItems = inFlight.filter((i) => group.statuses.includes(i.status)).sort(compareByPriority);
+                  if (!groupItems.length) return null;
+                  return (
+                    <div key={group.label} className="space-y-2">
+                      <div className="flex items-center gap-2 px-1 text-label text-text-tertiary">
+                        <StatusDot status={group.statuses[0]} />
+                        <span className="text-text-secondary">{group.label}</span>
+                        <span>({groupItems.length})</span>
+                      </div>
+                      {groupItems.map((r) => (
+                        <ItemCard key={r.id} row={r} compact />
+                      ))}
+                    </div>
+                  );
+                })}
                 {inFlight.length === 0 && <div className="px-1 py-1 text-label text-text-tertiary">—</div>}
               </div>
               {done.length > 0 && (

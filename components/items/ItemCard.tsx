@@ -5,12 +5,14 @@ import { TypeBadge } from "./TypeBadge";
 import { daysSince, daysUntil, formatDateShort } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { OwnerStack } from "./OwnerAvatar";
+import { PriorityPill, priorityValue } from "./PriorityPill";
 
 export function ItemCard({ row, compact = false, quoteBlocker = false }: { row: Row; compact?: boolean; quoteBlocker?: boolean }) {
   const due = daysUntil(row.due_date);
   const blockedDays = daysSince(row.blocked_since);
   const showStuck = blockedDays !== null && blockedDays > 7;
   const owners = row.r_emails.length ? row.r_emails : row.a_emails.length ? row.a_emails : row.d_emails;
+  const dimBody = row.priority === 3;
 
   const dueClass =
     row.due_date && due !== null
@@ -32,7 +34,7 @@ export function ItemCard({ row, compact = false, quoteBlocker = false }: { row: 
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-1.5 text-label text-text-tertiary">
+        <div className={cn("flex min-w-0 items-center gap-1.5 text-label text-text-tertiary", dimBody && "opacity-[0.78]")}>
           <span className="font-mono">#{row.id}</span>
           <TypeBadge type={row.type} />
           {!compact && (row.category || row.subsystem) && (
@@ -41,26 +43,34 @@ export function ItemCard({ row, compact = false, quoteBlocker = false }: { row: 
             </span>
           )}
         </div>
-        {showStuck && <span className="shrink-0 font-mono text-label text-status-blocked-text">stuck {blockedDays}d</span>}
+        {compact ? (
+          <PriorityPill priority={priorityValue(row.priority)} rankScore={row.rank_score} size="compact" />
+        ) : showStuck ? (
+          <span className={cn("shrink-0 font-mono text-label text-status-blocked-text", dimBody && "opacity-[0.78]")}>
+            stuck {blockedDays}d
+          </span>
+        ) : null}
       </div>
 
-      <div className={cn("mt-1.5 line-clamp-2 text-text-primary", compact ? "text-compact" : "text-item")}>{row.name}</div>
+      <div className={cn("mt-1.5 line-clamp-2 text-text-primary", compact ? "text-compact" : "text-item", dimBody && "opacity-[0.78]")}>
+        {row.name}
+      </div>
 
       {quoteBlocker && row.blocker && (
-        <blockquote className="mt-2 border-l border-border-medium pl-3 text-compact italic text-text-secondary">
+        <blockquote className={cn("mt-2 border-l border-border-medium pl-3 text-compact italic text-text-secondary", dimBody && "opacity-[0.78]")}>
           {row.blocker}
         </blockquote>
       )}
 
       <div className="mt-2.5 flex items-center justify-between gap-3">
-        <OwnerStack emails={owners} size={compact ? 16 : 18} />
-        <span className="shrink-0 font-mono text-label text-text-tertiary">
-          {row.rank_score === null ? "no rank" : `Rank ${row.rank_score}`}
-        </span>
+        <div className={cn("min-w-0", dimBody && "opacity-[0.78]")}>
+          <OwnerStack emails={owners} size={compact ? 16 : 18} />
+        </div>
+        {!compact && <PriorityPill priority={priorityValue(row.priority)} rankScore={row.rank_score} />}
       </div>
 
       {!compact && (
-        <div className="mt-2 flex items-center justify-between text-label">
+        <div className={cn("mt-2 flex items-center justify-between text-label", dimBody && "opacity-[0.78]")}>
           <span className="inline-flex items-center gap-1.5 text-text-secondary">
             <StatusDot status={row.status} />
             <span>{row.status}</span>

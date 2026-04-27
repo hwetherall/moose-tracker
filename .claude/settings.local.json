@@ -11,7 +11,10 @@
       "Bash(echo \"TSEXIT=$?\")",
       "Bash(echo \"BUILDEXIT=$?\")",
       "PowerShell(pnpm build *)",
-      "Bash(npx --no-install next build)"
+      "Bash(npx --no-install next build)",
+      "Bash(pnpm add *)",
+      "Bash(pnpm remove *)",
+      "Bash(npx --no-install next lint)"
     ]
   }
 }

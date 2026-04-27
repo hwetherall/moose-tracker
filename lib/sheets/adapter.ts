@@ -196,3 +196,38 @@ export function sheetRowUrl(sheetRow: number): string {
   const gid = env.planningGid();
   return `https://docs.google.com/spreadsheets/d/${id}/edit#gid=${gid}&range=A${sheetRow}`;
 }
+
+/**
+ * V2: write a single cell on Planning. Used by the proposal-approval pathway
+ * — both the AI Brief writeback (column Y / 25) and inspector_fix writes.
+ *
+ * `valueInputOption: USER_ENTERED` keeps adjacent auto-formula columns intact.
+ * Throws on a non-2xx response so the approval handler can surface and roll back.
+ */
+export async function updatePlanningCell(
+  sheetRow: number,
+  column: string, // e.g. "Y" or "W"
+  value: string | number | null
+): Promise<void> {
+  const sheets = sheetsClient();
+  await sheets.spreadsheets.values.update({
+    spreadsheetId: env.mooseSheetId(),
+    range: `Planning!${column}${sheetRow}`,
+    valueInputOption: "USER_ENTERED",
+    requestBody: { values: [[value ?? ""]] }
+  });
+}
+
+/**
+ * Map Planning column index (1-based) to its A1 letter. Only goes up to col 26
+ * because Planning is well within that bound; do not extend without testing
+ * a wider sheet.
+ */
+export function planningColLetter(colIndex: number): string {
+  if (colIndex < 1 || colIndex > 26) throw new Error(`unsupported planning col ${colIndex}`);
+  return String.fromCharCode(64 + colIndex);
+}
+
+/** The "AI Brief" column. Spencer adds this manually before V2 ships (§2.5). */
+export const AI_BRIEF_COL = "Y";
+export const AI_BRIEF_COL_INDEX = 25;
