@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { env } from "@/lib/env";
 
 /**
- * Server-only read client. The web surface is gated by NextAuth middleware,
+ * Server-only read client. The web surface is gated by the NextAuth proxy,
  * while Supabase RLS only recognizes Supabase auth JWTs. Use the service role
  * for server components so reads are not hidden behind the anon role.
  */

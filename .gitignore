@@ -13,3 +13,6 @@ coverage/
 next-env.d.ts
 client_secret_493154917481-bcalrcsjr3h2e25f9i2tk9su57ltqko0.apps.googleusercontent.com.json
 moose-tracker-494403-cffd9a5974c2.json
+
+.vercel
+.env*.local
