@@ -2,12 +2,14 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { CircleCheck, CircleX, Pencil, Loader2 } from "lucide-react";
+import { CircleCheck, CircleX, Pencil, Loader2, Mic, FileText } from "lucide-react";
 import type { ProposalRow } from "@/lib/agent/types";
 import { renderProposalValue, fieldLabel } from "./proposalRender";
 
 type ProposalCardProps = {
-  proposal: ProposalRow;
+  proposal: ProposalRow & {
+    voice_session?: { transcript: string; expires_at: string } | null;
+  };
   /** Compact mode renders inside the detail drawer; expanded for /inbox. */
   compact?: boolean;
   onResolved?: () => void;
@@ -19,6 +21,12 @@ export function ProposalCard({ proposal, compact, onResolved }: ProposalCardProp
   const [editValue, setEditValue] = useState(() => stringifyForEdit(proposal.proposed_value));
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [transcriptOpen, setTranscriptOpen] = useState(false);
+
+  const isVoice = proposal.source === "voice";
+  const transcript = proposal.voice_session?.transcript ?? null;
+  const transcriptAvailable = isVoice && !!proposal.source_session_id && !!transcript;
+  const transcriptExpired = isVoice && !!proposal.source_session_id && !transcript;
 
   const submit = (kind: "approve" | "reject", value?: unknown) => {
     setError(null);
@@ -60,9 +68,16 @@ export function ProposalCard({ proposal, compact, onResolved }: ProposalCardProp
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-badge uppercase tracking-[0.04em] text-text-tertiary">
+          {isVoice && <Mic className="h-3 w-3" />}
           <span>{fieldLabel(proposal.field)}</span>
           <span>·</span>
           <span>{proposal.proposal_type === "enrichment" ? "Enrichment" : "Inspector fix"}</span>
+          {isVoice && (
+            <>
+              <span>·</span>
+              <span>via voice</span>
+            </>
+          )}
         </div>
       </div>
 
@@ -110,6 +125,18 @@ export function ProposalCard({ proposal, compact, onResolved }: ProposalCardProp
               <CircleX className="h-3.5 w-3.5" />
               Reject
             </Btn>
+            {transcriptAvailable && !compact && (
+              <Btn onClick={() => setTranscriptOpen((v) => !v)} kind="ghost">
+                <FileText className="h-3.5 w-3.5" />
+                {transcriptOpen ? "Hide transcript" : "View transcript"}
+              </Btn>
+            )}
+            {transcriptExpired && !compact && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-label italic text-text-tertiary">
+                <FileText className="h-3.5 w-3.5" />
+                Transcript expired
+              </span>
+            )}
           </>
         ) : (
           <>
@@ -123,6 +150,15 @@ export function ProposalCard({ proposal, compact, onResolved }: ProposalCardProp
           </>
         )}
       </div>
+
+      {transcriptOpen && transcript && !compact && (
+        <div className="mt-3 rounded-md border border-border-subtle bg-bg-muted px-3 py-2">
+          <div className="mb-1 text-badge uppercase tracking-[0.04em] text-text-tertiary">
+            Transcript
+          </div>
+          <p className="whitespace-pre-wrap text-compact text-text-secondary">{transcript}</p>
+        </div>
+      )}
     </div>
   );
 }

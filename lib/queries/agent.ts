@@ -1,6 +1,10 @@
 import { supabaseServer } from "@/lib/supabase/server";
 import type { FindingRow, ItemEnrichmentRow, ProposalRow } from "@/lib/agent/types";
 
+export type ProposalRowWithSession = ProposalRow & {
+  voice_session: { transcript: string; expires_at: string } | null;
+};
+
 export async function fetchEnrichment(itemId: number): Promise<ItemEnrichmentRow | null> {
   const sb = supabaseServer();
   const { data, error } = await sb
@@ -24,16 +28,21 @@ export async function fetchPendingProposalsForItem(itemId: number): Promise<Prop
   return (data as ProposalRow[] | null) ?? [];
 }
 
-export async function fetchAllPendingProposals(): Promise<ProposalRow[]> {
+export async function fetchAllPendingProposals(): Promise<ProposalRowWithSession[]> {
   const sb = supabaseServer();
+  // Left-join voice_enrichment_sessions so /inbox can render the transcript
+  // chip without a per-proposal round trip. PostgREST infers the relationship
+  // from the source_session_id foreign key declared in 0004_v25.sql.
   const { data, error } = await sb
     .from("agent_proposals")
-    .select("*")
+    .select(
+      "*, voice_session:voice_enrichment_sessions!source_session_id(transcript,expires_at)"
+    )
     .eq("status", "pending")
     .order("generated_at", { ascending: false })
     .limit(500);
   if (error) throw error;
-  return (data as ProposalRow[] | null) ?? [];
+  return (data as ProposalRowWithSession[] | null) ?? [];
 }
 
 export async function fetchPendingProposalCount(): Promise<number> {

@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Sparkles, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Sparkles, Loader2, Mic } from "lucide-react";
 import type { ItemEnrichmentRow, ProposalRow } from "@/lib/agent/types";
 import { ProposalCard } from "./ProposalCard";
 import { fieldLabel, renderProposalValue } from "./proposalRender";
+import { VoiceEnrichModal } from "@/components/voice/VoiceEnrichModal";
 
 type Field =
   | "brief"
@@ -25,10 +27,12 @@ const FIELDS: Field[] = [
 
 export function EnrichmentSection({
   itemId,
+  itemName,
   enrichment,
   pending
 }: {
   itemId: number;
+  itemName: string;
   enrichment: ItemEnrichmentRow | null;
   pending: ProposalRow[];
 }) {
@@ -42,7 +46,24 @@ export function EnrichmentSection({
       !enrichment.risk_rationale &&
       enrichment.related_item_ids.length === 0
     );
+  const isAnyEmpty =
+    !enrichment ||
+    !enrichment.brief ||
+    enrichment.acceptance_criteria.length === 0 ||
+    !enrichment.effort_estimate ||
+    !enrichment.risk_level ||
+    !enrichment.risk_rationale ||
+    enrichment.related_item_ids.length === 0;
   const noPending = pending.length === 0;
+  // V2.5: voice fills brief + AC. Show the voice button if either is empty
+  // and there is no pending proposal that would be superseded by submit.
+  const briefOrAcEmpty =
+    !enrichment || !enrichment.brief || enrichment.acceptance_criteria.length === 0;
+  const noPendingForVoiceFields = !pending.some(
+    (p) => p.field === "brief" || p.field === "acceptance_criteria"
+  );
+  const showSuggest = isAllEmpty && noPending;
+  const showVoice = briefOrAcEmpty && noPendingForVoiceFields && isAnyEmpty;
 
   return (
     <div className="rounded-md border border-border-subtle bg-bg-muted p-3">
@@ -62,7 +83,12 @@ export function EnrichmentSection({
         ))}
       </div>
 
-      {isAllEmpty && noPending && <SuggestOne itemId={itemId} />}
+      {(showSuggest || showVoice) && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border-subtle pt-3">
+          {showSuggest && <SuggestOne itemId={itemId} />}
+          {showVoice && <VoiceEnrich itemId={itemId} itemName={itemName} />}
+        </div>
+      )}
     </div>
   );
 }
@@ -96,6 +122,7 @@ function FieldRow({
 }
 
 function SuggestOne({ itemId }: { itemId: number }) {
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -114,13 +141,13 @@ function SuggestOne({ itemId }: { itemId: number }) {
         return;
       }
       setDone(true);
-      // Soft refresh — let the user see the new proposals appear.
-      setTimeout(() => window.location.reload(), 700);
+      // Re-render the drawer in place so new proposals appear without unmounting.
+      router.refresh();
     });
   };
 
   return (
-    <div className="mt-3 border-t border-border-subtle pt-3">
+    <div className="flex flex-col gap-1">
       <button
         type="button"
         onClick={handleClick}
@@ -131,9 +158,31 @@ function SuggestOne({ itemId }: { itemId: number }) {
         {done ? "Suggesting…" : pending ? "Asking the agent…" : "Suggest one"}
       </button>
       {error && (
-        <div className="mt-2 text-label text-status-blocked-text">{error}</div>
+        <div className="text-label text-status-blocked-text">{error}</div>
       )}
     </div>
+  );
+}
+
+function VoiceEnrich({ itemId, itemName }: { itemId: number; itemName: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="inline-flex items-center gap-1.5 rounded-md border border-border-subtle bg-bg-surface px-2.5 py-1 text-label text-text-secondary hover:bg-bg-muted"
+      >
+        <Mic className="h-3.5 w-3.5" />
+        Voice enrich
+      </button>
+      <VoiceEnrichModal
+        open={open}
+        itemId={itemId}
+        itemName={itemName}
+        onClose={() => setOpen(false)}
+      />
+    </>
   );
 }
 

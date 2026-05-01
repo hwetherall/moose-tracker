@@ -4,6 +4,7 @@
     { "path": "/api/cron/snapshot",     "schedule": "55 23 * * *" },
     { "path": "/api/cron/agent/inspect", "schedule": "*/15 * * * *" },
     { "path": "/api/cron/agent/enrich",  "schedule": "0 */2 * * *" },
-    { "path": "/api/cron/agent/brief",   "schedule": "5 7 * * *" }
+    { "path": "/api/cron/agent/brief",   "schedule": "5 7 * * *" },
+    { "path": "/api/cron/voice/retention", "schedule": "0 4 * * *" }
   ]
 }

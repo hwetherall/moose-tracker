@@ -9,6 +9,7 @@ import type { ExpRow } from "@/lib/queries/experiments";
 import type { FindingRow, ItemEnrichmentRow, ProposalRow } from "@/lib/agent/types";
 import { EnrichmentSection } from "@/components/agent/EnrichedField";
 import { InspectorFindingList } from "@/components/agent/InspectorBadge";
+import { EditItemButton } from "./EditItemButton";
 
 function sheetDeepLink(sheetRow: number): string {
   const id = process.env.MOOSE_SHEET_ID ?? "";
@@ -48,6 +49,10 @@ export function ItemDetail({
   pendingProposals?: ProposalRow[];
   findings?: FindingRow[];
 }) {
+  const approvedBrief = enrichment?.brief_approved_at ? enrichment?.brief : null;
+  const sheetBrief = row.ai_brief_from_sheet;
+  const briefText = sheetBrief ?? approvedBrief ?? null;
+
   return (
     <div className="flex h-full flex-col bg-bg-surface text-text-primary">
       <div className="flex items-start justify-between gap-3 border-b border-border-subtle p-4">
@@ -75,21 +80,21 @@ export function ItemDetail({
             )}
           </div>
         </div>
-        <a
-          href={sheetDeepLink(row.sheet_row)}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border-subtle bg-bg-surface px-2.5 py-1.5 text-label text-text-secondary hover:bg-bg-muted"
-        >
-          Open in Sheet <ExternalLink className="h-3 w-3" />
-        </a>
+        <div className="flex shrink-0 items-center gap-2">
+          <EditItemButton row={row} brief={briefText} />
+          <a
+            href={sheetDeepLink(row.sheet_row)}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 rounded-md border border-border-subtle bg-bg-surface px-2.5 py-1.5 text-label text-text-secondary hover:bg-bg-muted"
+          >
+            Open in Sheet <ExternalLink className="h-3 w-3" />
+          </a>
+        </div>
       </div>
 
       <div className="flex-1 space-y-5 overflow-y-auto p-4 scrollbar-thin">
         {(() => {
-          const approvedBrief = enrichment?.brief_approved_at ? enrichment?.brief : null;
-          const sheetBrief = row.ai_brief_from_sheet;
-          const briefText = approvedBrief ?? sheetBrief ?? null;
           if (!briefText) return null;
           const divergence =
             approvedBrief && sheetBrief && approvedBrief !== sheetBrief;
@@ -108,6 +113,7 @@ export function ItemDetail({
 
         <EnrichmentSection
           itemId={row.id}
+          itemName={row.name}
           enrichment={enrichment ?? null}
           pending={(pendingProposals ?? []).filter((p) => p.proposal_type === "enrichment")}
         />

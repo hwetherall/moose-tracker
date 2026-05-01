@@ -218,6 +218,24 @@ export async function updatePlanningCell(
   });
 }
 
+export async function updatePlanningCells(
+  sheetRow: number,
+  cells: Array<{ column: string; value: string | number | null }>
+): Promise<void> {
+  if (cells.length === 0) return;
+  const sheets = sheetsClient();
+  await sheets.spreadsheets.values.batchUpdate({
+    spreadsheetId: env.mooseSheetId(),
+    requestBody: {
+      valueInputOption: "USER_ENTERED",
+      data: cells.map((cell) => ({
+        range: `Planning!${cell.column}${sheetRow}`,
+        values: [[cell.value ?? ""]]
+      }))
+    }
+  });
+}
+
 /**
  * Map Planning column index (1-based) to its A1 letter. Only goes up to col 26
  * because Planning is well within that bound; do not extend without testing

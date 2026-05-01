@@ -14,7 +14,8 @@
       "Bash(npx --no-install next build)",
       "Bash(pnpm add *)",
       "Bash(pnpm remove *)",
-      "Bash(npx --no-install next lint)"
+      "Bash(npx --no-install next lint)",
+      "Read(//tmp/**)"
     ]
   }
 }
