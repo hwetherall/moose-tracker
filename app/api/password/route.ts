@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const PASSWORD = 'k9v4q2KfEnja';
+const PASSWORD = process.env.APP_PASSWORD || '';
 const PASSWORD_COOKIE = 'antler-password';
 
 export async function POST(request: Request) {

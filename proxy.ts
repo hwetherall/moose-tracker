@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
-const PASSWORD = 'k9v4q2KfEnja';
+const PASSWORD = process.env.APP_PASSWORD || '';
 const PASSWORD_COOKIE = 'antler-password';
 
 export const proxy = auth((req) => {
@@ -17,6 +17,7 @@ export const proxy = auth((req) => {
     path === "/favicon.ico";
   if (isPublic) return NextResponse.next();
 
+  // Check password cookie
   const passwordCookie = req.cookies.get(PASSWORD_COOKIE);
   const hasValidPassword = passwordCookie?.value === PASSWORD;
 
