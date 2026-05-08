@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useSWRConfig } from "swr";
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -10,6 +11,7 @@ export function RefreshButton() {
   const [pendingSync, setPendingSync] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const { mutate } = useSWRConfig();
+  const router = useRouter();
 
   useEffect(() => {
     function handler(e: Event) {
@@ -27,11 +29,12 @@ export function RefreshButton() {
     setBusy(true);
     setMsg(null);
     try {
-      const r = await fetch("/api/refresh", { method: "POST" });
+      const r = await fetch("/api/refresh", { method: "POST", cache: "no-store" });
       const data = await r.json();
       if (!r.ok || !data.ok) throw new Error(data.error ?? "Refresh failed");
-      // Revalidate everything SWR-keyed
+      // Revalidate SWR-keyed client data and re-fetch server component payloads
       await mutate(() => true, undefined, { revalidate: true });
+      router.refresh();
       setMsg(data.skipped ? "Already running" : "Updated");
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Failed");

@@ -15,7 +15,8 @@
       "Bash(pnpm add *)",
       "Bash(pnpm remove *)",
       "Bash(npx --no-install next lint)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(dir *)"
     ]
   }
 }
