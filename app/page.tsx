@@ -51,6 +51,33 @@ export default async function OverviewPage() {
             86_400_000
         )
       : null;
+  // A release is past-due when planned_prod is behind us and no actual_prod has
+  // been recorded. The old logic only considered revised_prod vs planned_prod,
+  // so a release blew its date but kept showing "On track" until someone filled
+  // in the revised column.
+  const plannedProdMs = currentReleaseMeta?.planned_prod
+    ? new Date(currentReleaseMeta.planned_prod).getTime()
+    : null;
+  const actualProdMs = currentReleaseMeta?.actual_prod
+    ? new Date(currentReleaseMeta.actual_prod).getTime()
+    : null;
+  const isShipped = actualProdMs !== null;
+  const isPastDue = !isShipped && plannedProdMs !== null && plannedProdMs < Date.now();
+  const isAtRisk = !isShipped && ((slipDays !== null && slipDays > 0) || isPastDue);
+  const releaseStatusLabel = !currentRelease
+    ? "No release"
+    : isShipped
+      ? "Shipped"
+      : isAtRisk
+        ? "At risk"
+        : "On track";
+  const releaseStatusAccent: "warn" | "blocked" | "done" | undefined = !currentRelease
+    ? undefined
+    : isShipped
+      ? "done"
+      : isAtRisk
+        ? "blocked"
+        : "done";
 
   const topBlocked = [...blocked]
     .sort((a, b) => {
@@ -109,8 +136,8 @@ export default async function OverviewPage() {
       <section className="grid overflow-hidden rounded-xl border border-border-subtle bg-bg-surface md:grid-cols-[1.1fr_1fr_1fr_1fr_1fr]">
         <Stat
           label={`Release ${currentRelease ?? "none"}`}
-          value={slipDays !== null && slipDays > 0 ? "At risk" : currentRelease ? "On track" : "No release"}
-          accent={slipDays !== null && slipDays > 0 ? "blocked" : currentRelease ? "done" : undefined}
+          value={releaseStatusLabel}
+          accent={releaseStatusAccent}
           hint={
             currentReleaseMeta?.planned_prod
               ? `planned ${formatDateShort(currentReleaseMeta.planned_prod)}${

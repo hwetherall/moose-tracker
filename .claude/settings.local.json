@@ -16,7 +16,11 @@
       "Bash(pnpm remove *)",
       "Bash(npx --no-install next lint)",
       "Read(//tmp/**)",
-      "Bash(dir *)"
+      "Bash(dir *)",
+      "Read(//c/Users/hweth/.claude/**)",
+      "Read(//c/Users/hweth/.claude/skills/**)",
+      "Bash(npx vitest *)",
+      "Bash(tee test-output.txt)"
     ]
   }
 }

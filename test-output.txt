@@ -1,0 +1,11 @@
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mC:/Users/hweth/OneDrive/Desktop/Innovera/Rapid Prototyping/moose-dashboard[39m
+
+ [32m✓[39m lib/seq.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m   Start at [22m 14:00:11
+[2m   Duration [22m 3.32s[2m (transform 66ms, setup 0ms, collect 83ms, tests 5ms, environment 0ms, prepare 2.59s)[22m
+
